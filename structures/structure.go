@@ -41,7 +41,7 @@ func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUnce
 		queryString = "RES2"
 	} else if f.OccType.Name == "RES3A" {
 		queryString = "RES1_RES3A_RES3B"
-	} else if f.OccType.Name == "RES3A" {
+	} else if f.OccType.Name == "RES3B" { // Should this be (else if f.OccType.Name == "RES3B")?
 		queryString = "RES1_RES3A_RES3B"
 	} else if strings.Contains(f.OccType.Name, "RES1") {
 		queryString = "RES1_RES3A_RES3B"
@@ -89,9 +89,9 @@ func (s BaseStructure) Location() geography.Location {
 func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic {
 	r := rand.New(rand.NewSource(seed))
 	ot := OccupancyTypeDeterministic{} //Beware null errors!
-	sv := 0.0
-	cv := 0.0
-	fh := 0.0
+	sv := 0.0                          // Structure Value
+	cv := 0.0                          // Content Value
+	fh := 0.0                          // Foundation Height
 	if s.UseUncertainty {
 		ot = s.OccType.SampleOccupancyType(r.Int63()) //this is super inefficient. At the time this is called we know the hazard.
 		sv = s.StructVal.SampleValue(r.Float64())
@@ -149,8 +149,8 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "mv_s_dam", "ghg_emissions"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	sval := s.StructVal
@@ -163,12 +163,23 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	if cderr != nil {
 		return ret, cderr
 	}
+	// TODO: get damage function parameters, rather than a depth-damage table
+	mvsDamFun, mvsderr := s.OccType.GetComponentDamageFunctionForHazard("multivariate_structure", e)
+	if mvsderr != nil {
+		return ret, mvsderr
+	}
+	ghgDamFun, ghgerr := s.OccType.GetComponentDamageFunctionForHazard("greenhouse_gas", e)
+	if ghgerr != nil {
+		return ret, ghgerr
+	}
+
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
 		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
 		representativeStories := math.Ceil(damagefunctionMax / 9.0)
 		if s.NumStories > int32(representativeStories) {
 			//there is great potential that the value of the structure is not representative of the damage function range.
+			//If the representativeStories == 2, and building has 4 stories, modifier halves the potential damage?
 			modifier := representativeStories / float64(s.NumStories)
 			sval *= modifier
 			conval *= modifier
@@ -178,11 +189,26 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		//they exist!
 		sdampercent := 0.0
 		cdampercent := 0.0
+
+		mvsDamage := 0.0
+		ghgEmissions := 0.0
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
 			depthAboveFFE := e.Depth() - s.FoundHt
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
+			if e.Has(mvsDamFun.DamageDriver) && e.Has(ghgDamFun.DamageDriver) {
+				// The usual approach won't work unless I defined a unique occtype for every combination of
+				//    n_floor, sqft, n_bed, n_bath, n_car, and compiled a damage function for each
+				//
+				mvsDamage = mvsDamFun.DamageFunction.SampleValue(depthAboveFFE) //what does SampleValue() do exactly? Where is it?
+				// TODO: write alternative function that gets regression parameters and calculates results based on structure factors
+				// CalcValue(depthAboveFFE, s.sqft, s.bedrooms, s.total_bath, s.n_car)
+				//TODO: will have to include sqft, bedrooms, total_bath in
+				ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
+				//
+			}
+
 		case hazards.Erosion:
 			sdampercent = sDamFun.DamageFunction.SampleValue(e.Erosion()) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(e.Erosion()) / 100
@@ -205,6 +231,9 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 		ret.Result[12] = s.CBFips
 		ret.Result[13] = sdampercent
 		ret.Result[14] = cdampercent
+		//TODO: Allow Result to take these two additional parameters.
+		ret.Result[15] = mvsDamage
+		ret.Result[16] = ghgEmissions
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
 		ret.Result[0] = s.BaseStructure.Name
