@@ -92,16 +92,26 @@
                         "mean_params": {
                             "intercept": 0,
                             "depth": 0,
+                            "sqft": 0,
                             "n_bed": 0,
                             "n_bath": 0,
-                            "n_car": 0
+                            "n_car": 0,
+                            "depth_sqft": 0,
+                            "depth_n_bed": 0,
+                            "depth_n_bath": 0,
+                            "depth_n_car": 0
                         },
                         "sd_params": {
                             "intercept": 0,
                             "depth": 0,
+                            "sqft": 0,
                             "n_bed": 0,
                             "n_bath": 0,
-                            "n_car": 0
+                            "n_car": 0,
+                            "depth_sqft": 0,
+                            "depth_n_bed": 0,
+                            "depth_n_bath": 0,
+                            "depth_n_car": 0
                         }
                     }
                 }
