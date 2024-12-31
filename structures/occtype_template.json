@@ -1,5 +1,63 @@
-{"RES1-1SNB": {
+{
+"RES1-1SNB": {
     "name": "RES1-1SNB",
+    "componentdamagefunctions": {
+        "multivariate_structure": {
+            "damagefunctions": {
+                "depth": {
+                    "source": "Rowan et al. (2024)",
+                    "damagedriver": "depth",
+                    "damagefunction": {
+                        "mean_params": {
+                            "intercept": -10660.0,
+                            "depth": 6357.0,
+                            "sqft": 33.76,
+                            "n_bed": 895.7,
+                            "n_bath": 0.0,
+                            "n_car": 3921.0
+                        },
+                        "sd_params": {
+                            "intercept": 444.2,
+                            "depth": 301.7,
+                            "sqft": 3.941,
+                            "n_bed": 51.15,
+                            "n_bath": -87.93,
+                            "n_car": 280.4
+                        }
+                    }
+                }
+            }
+        },
+        "greenhouse_gas": {
+            "damagefunctions": {
+                "depth": {
+                    "source": "Rowan et al. (2024)",
+                    "damagedriver": "depth",
+                    "damagefunction": {
+                        "mean_params": {
+                            "intercept": -5413,
+                            "depth": 1939,
+                            "sqft": 13.3,
+                            "n_bed": 296.8,
+                            "n_bath": 0.0,
+                            "n_car": 1227
+                        },
+                        "sd_params": {
+                            "intercept": 322.4,
+                            "depth": 38.26,
+                            "sqft": 2.303,
+                            "n_bed": 0.0,
+                            "n_bath": -20.93,
+                            "n_car": 79.57
+                        }
+                    }
+                }
+            }
+        }
+    }
+},
+"RES1-2SNB": {
+    "name": "RES1-2SNB",
     "componentdamagefunctions": {
         "multivariate_structure": {
             "damagefunctions": {
@@ -24,6 +82,31 @@
                     }
                 }
             }
+        },
+        "greenhouse_gas": {
+            "damagefunctions": {
+                "depth": {
+                    "source": "Rowan et al. (2024)",
+                    "damagedriver": "depth",
+                    "damagefunction": {
+                        "mean_params": {
+                            "intercept": 0,
+                            "depth": 0,
+                            "n_bed": 0,
+                            "n_bath": 0,
+                            "n_car": 0
+                        },
+                        "sd_params": {
+                            "intercept": 0,
+                            "depth": 0,
+                            "n_bed": 0,
+                            "n_bath": 0,
+                            "n_car": 0
+                        }
+                    }
+                }
+            }
         }
     }
-}}
+}
+}
