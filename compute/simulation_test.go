@@ -142,8 +142,7 @@ func Test_StreamAbstract(t *testing.T) {
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped"
 	filepath := root + ".tif"
-
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.gpkg", "results", "GPKG")
+  w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.gpkg", "results", "GPKG")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
