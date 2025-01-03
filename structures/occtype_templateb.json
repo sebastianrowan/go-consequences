@@ -5,7 +5,7 @@
         "multivariate_structure": {
             "damagefunctions": {
                 "depth": {
-                    "source": "Rowan et al. (2024)",
+                    "source": "Rowan et al. (2024b)",
                     "damagedriver": "depth",
                     "damagefunction": {
                         "mean_params": {
@@ -39,7 +39,7 @@
         "greenhouse_gas": {
             "damagefunctions": {
                 "depth": {
-                    "source": "Rowan et al. (2024)",
+                    "source": "Rowan et al. (2024b)",
                     "damagedriver": "depth",
                     "damagefunction": {
                         "mean_params": {
@@ -78,7 +78,7 @@
         "multivariate_structure": {
             "damagefunctions": {
                 "depth": {
-                    "source": "Rowan et al. (2024)",
+                    "source": "Rowan et al. (2024b)",
                     "damagedriver": "depth",
                     "damagefunction": {
                         "mean_params": {
@@ -112,7 +112,7 @@
         "greenhouse_gas": {
             "damagefunctions": {
                 "depth": {
-                    "source": "Rowan et al. (2024)",
+                    "source": "Rowan et al. (2024b)",
                     "damagedriver": "depth",
                     "damagefunction": {
                         "mean_params": {
