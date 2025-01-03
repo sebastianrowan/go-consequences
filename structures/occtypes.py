@@ -47,7 +47,7 @@ def build_damage_function(df):
                 "source": "Rowan et al. (2024a)",
                 "damagedriver": "depth",
                 "damagefunction": {
-                    "xvalues":[-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+                    "xvalues":[],
                     "ydistributions": []
                 }
             }
@@ -67,6 +67,7 @@ def build_damage_function(df):
             }
         }
 
+        output['damagefunctions']['depth']['damagefunction']['xvalues'].append(row['flood_depth'])
         output['damagefunctions']['depth']['damagefunction']['ydistributions'].append(ydist)
 
     return(output)
@@ -83,7 +84,7 @@ def read_occtypes():
     
 def print_dfs():
     dfs = pd.read_parquet("rowan_2024a_dmg_fns.parquet")
-    dfs['co2_cost_pct_sd'] = (dfs['co2_cost_pct_mean'] - dfs['co2_cost_pct_low']) * 0.5
+    dfs['co2_cost_pct_sd'] = (dfs['co2_cost_pct_mean'] - dfs['co2_cost_pct_low']) / 1.96
     dfs = dfs[['occtype', 'flood_depth', 'co2_cost_pct_mean', 'co2_cost_pct_sd']]
     dfs['flood_depth'] = dfs['flood_depth'].round(1)
     dfs = dfs[(dfs['flood_depth'] % 1 == 0) & (dfs['flood_depth'] <= 16)]
@@ -96,10 +97,10 @@ def main():
     with open("occtypes.json", "r") as f:
         occtypes = json.load(f)
 
-    dfs['co2_cost_pct_sd'] = (dfs['co2_cost_pct_mean'] - dfs['co2_cost_pct_low']) * 0.5
+    dfs['co2_cost_pct_sd'] = (dfs['co2_cost_pct_mean'] - dfs['co2_cost_pct_low']) / 1.96
     dfs = dfs[['occtype', 'flood_depth', 'co2_cost_pct_mean', 'co2_cost_pct_sd']]
     dfs['flood_depth'] = dfs['flood_depth'].round(1)
-    dfs = dfs[(dfs['flood_depth'] % 1 == 0) & (dfs['flood_depth'] <= 16)]
+    dfs = dfs[(dfs['flood_depth']*10 % 1 == 0) & (dfs['flood_depth'] <= 16)]
 
     dfs1 = dfs[dfs['occtype'] == "RES1-1S"]
     dfs2 = dfs[dfs['occtype'] == "RES1-2S"]
