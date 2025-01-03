@@ -13,9 +13,34 @@ def prettify_occtypes():
     with open("occtypes_sbr.json", "w") as out:
         json.dump(occtypes, out, indent=4)
 
-def build_damage_function(df):
-    # building the 'value' for the "componentdamagefunctions" key, value pair
+def build_null_df(df):
+    output = {
+        "damagefunctions": {
+            "depth": {
+                "source": "Rowan et al. (2024a)",
+                "damagedriver": "depth",
+                "damagefunction": {
+                    "xvalues":[-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+                    "ydistributions": []
+                }
+            }
+        }
+    }
     
+    for i, row in df.iterrows():
+        ydist = {
+            "type": "NormalDistribution",
+            "parameters":{
+                "mean": 0,
+                "sd": 0
+            }
+        }
+
+        output['damagefunctions']['depth']['damagefunction']['ydistributions'].append(ydist)
+
+    return(output)
+
+def build_damage_function(df):
     output = {
         "damagefunctions": {
             "depth": {
@@ -81,6 +106,7 @@ def main():
 
     df1 = build_damage_function(dfs1)
     df2 = build_damage_function(dfs2)
+    dfnull = build_null_df(dfs1)
     
     occtypes_out = {"occupancytypes":{}}
     for key, o in occtypes['occupancytypes'].items():
@@ -88,12 +114,17 @@ def main():
         if(o['name'][0:7] == "RES1-1S"):
             print(f"{o['name']} getting ghg df1")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df1
-        if(o['name'][0:7] in ["RES1-2S", "RES1-3S"]):
+        elif(o['name'][0:7] in ["RES1-2S", "RES1-3S", "RES1-SL", "RES3A", "RES3B"]):
             print(f"{o['name']} getting ghg df2")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df2
-    print(occtypes_out)
+        else:
+            print(f"{o['name']} getting ghg dfnull")
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = dfnull
+
+    # print(occtypes_out)
     # with open("occtypes_ghgrowan2024a.json", "w") as out:
-    #     json.dump(occtypes_out, out, indent=4)
+    with open("occtypes.json", "w") as out:
+        json.dump(occtypes_out, out, indent=4)
 
 
 

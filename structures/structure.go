@@ -170,6 +170,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	// }
 	ghgDamFun, ghgerr := s.OccType.GetComponentDamageFunctionForHazard("greenhouse_gas", e)
 	if ghgerr != nil {
+		fmt.Println(ghgerr)
 		return ret, ghgerr
 	}
 
@@ -198,13 +199,13 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 			depthAboveFFE = e.Depth() - s.FoundHt
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-			ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
 			// ghgEmissions = 1
 			// if e.Has(mvsDamFun.DamageDriver) && e.Has(ghgDamFun.DamageDriver) {
 			if e.Has(ghgDamFun.DamageDriver) {
 				// The usual approach won't work unless I defined a unique occtype for every combination of
 				//    n_floor, sqft, n_bed, n_bath, n_car, and compiled a damage function for each
-				//
+				ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
+
 				// mvsDamage = mvsDamFun.DamageFunction.SampleValue(depthAboveFFE) //what does SampleValue() do exactly? Where is it?
 				// TODO: write alternative function that gets regression parameters and calculates results based on structure factors
 				// CalcValue(depthAboveFFE, s.sqft, s.bedrooms, s.total_bath, s.n_car)
