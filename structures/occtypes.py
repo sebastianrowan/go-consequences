@@ -72,6 +72,42 @@ def build_damage_function(df):
 
     return(output)
 
+def build_mv_damage_function():
+    output = {
+        "damagefunctions": {
+            "depth": {
+                "source": "Rowan et al. (2024a)",
+                "damagedriver": "depth",
+                "damagefunction": {
+                    "mean_params": {
+                        "intercept": 1,
+                        "depth": 2,
+                        "sqft": 3,
+                        "n_bed": 4,
+                        "n_bath": 5,
+                        "n_car": 6,
+                        "depth_sqft": 7,
+                        "depth_n_bed": 8,
+                        "depth_n_bath": 9,
+                        "depth_n_car": 10
+                    },
+                    "sd_params": {
+                        "intercept": 10,
+                        "depth": 20,
+                        "sqft": 30,
+                        "n_bed": 40,
+                        "n_bath": 50,
+                        "n_car": 60,
+                        "depth_sqft": 70,
+                        "depth_n_bed": 80,
+                        "depth_n_bath": 90,
+                        "depth_n_car": 0
+                    }
+                }
+            }
+        }
+    }
+    return(output)
 
 def read_occtypes():
     with open("occtypes.json", "r") as f:
@@ -108,6 +144,8 @@ def main():
     df1 = build_damage_function(dfs1)
     df2 = build_damage_function(dfs2)
     dfnull = build_null_df(dfs1)
+
+    df_mv = build_mv_damage_function()
     
     occtypes_out = {"occupancytypes":{}}
     for key, o in occtypes['occupancytypes'].items():
@@ -115,12 +153,15 @@ def main():
         if(o['name'][0:7] == "RES1-1S"):
             print(f"{o['name']} getting ghg df1")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df1
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv
         elif(o['name'][0:7] in ["RES1-2S", "RES1-3S", "RES1-SL", "RES3A", "RES3B"]):
             print(f"{o['name']} getting ghg df2")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df2
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv
         else:
             print(f"{o['name']} getting ghg dfnull")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = dfnull
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv
 
     # print(occtypes_out)
     # with open("occtypes_ghgrowan2024a.json", "w") as out:
