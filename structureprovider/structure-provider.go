@@ -126,7 +126,7 @@ func (gpk gdalDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) 
 }
 func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
-	m2 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
+	m2 := gpk.OccTypeProvider.OccupancyTypeMapMultiVariate()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -156,7 +156,7 @@ func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.Stream
 func (gpk gdalDataSet) processFipsStreamDeterministic(fipscode string, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
-	m3 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
+	m3 := gpk.OccTypeProvider.OccupancyTypeMapMultiVariate()
 
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]
@@ -190,7 +190,7 @@ func (gpk gdalDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcess
 }
 func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
-	m2 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
+	m2 := gpk.OccTypeProvider.OccupancyTypeMapMultiVariate()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -216,7 +216,7 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 func (gpk gdalDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
-	m3 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
+	m3 := gpk.OccTypeProvider.OccupancyTypeMapMultiVariate()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]
 	idx := 0

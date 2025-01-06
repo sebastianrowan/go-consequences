@@ -122,7 +122,6 @@ type DamageFunction struct {
 	Source         string                `json:"source"`
 	DamageDriver   hazards.Parameter     `json:"damagedriver"`
 	DamageFunction paireddata.PairedData `json:"damagefunction"`
-	// DamageFunction PairedDataSBR `json:"damagefunction"`
 }
 
 type DamageFunctionStochastic struct {
@@ -237,7 +236,7 @@ func (o OccupancyTypeDeterministic) GetComponentDamageFunctionForHazard(componen
 	return DamageFunction{}, errors.New("component does not exist for this occupancy type")
 }
 
-func (o OccupancyTypeSBR) GetComponentDamageFunctionForHazardSBR(component string) (DamageFunctionSBR, error) {
+func (o OccupancyTypeMultiVariate) GetComponentDamageFunctionForHazardMultiVariate(component string) (DamageFunctionMultiVariate, error) {
 	c, cok := o.ComponentDamageFunctions[component]
 	if cok {
 		r, rok := c.DamageFunctions["depth"]
@@ -245,7 +244,7 @@ func (o OccupancyTypeSBR) GetComponentDamageFunctionForHazardSBR(component strin
 			return r, nil
 		}
 	}
-	return DamageFunctionSBR{}, errors.New("component does not exist for this occupancy type")
+	return DamageFunctionMultiVariate{}, errors.New("component does not exist for this occupancy type")
 }
 
 // UncertaintyOccupancyTypeSampler provides the pattern for an OccupancyTypeStochastic to produce an OccupancyTypeDeterministic

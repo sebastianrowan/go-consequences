@@ -39,7 +39,7 @@ func OptionalSchema() []string {
 func featuretoStructure(
 	f *gdal.Feature,
 	m map[string]structures.OccupancyTypeStochastic,
-	m2 map[string]structures.OccupancyTypeSBR,
+	m2 map[string]structures.OccupancyTypeMultiVariate,
 	defaultOcctype structures.OccupancyTypeStochastic,
 	idxs []int,
 	oidxs []int,
@@ -49,7 +49,7 @@ func featuretoStructure(
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
-	var occtypeSBR = structures.OccupancyTypeSBR{}
+	var occtypeMV = structures.OccupancyTypeMultiVariate{}
 	//dont have access to foundation type in the structure schema yet.
 	if idxs[9] > 0 {
 		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
@@ -64,14 +64,13 @@ func featuretoStructure(
 				//return s, errors.New(msg)
 			}
 		}
-		if otfsbr, okfsbr := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfsbr {
-			occtypeSBR = otfsbr
+		if otfmv, okfmv := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfmv {
+			occtypeMV = otfmv
 		} else {
-			if otSBR, okSBR := m2[OccTypeName]; okSBR {
-				occtypeSBR = otSBR
+			if otMV, okMV := m2[OccTypeName]; okMV {
+				occtypeMV = otMV
 			} else {
-				// occtypeSBR = structures.OccupancyTypeSBR{}
-				msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 74)"
+				msg := "Defining occtypeMV failed (structureprovider/interfaces.go line 74)"
 				fmt.Println(msg)
 				//return s, errors.New(msg)
 			}
@@ -85,17 +84,17 @@ func featuretoStructure(
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
-		if otSBR, okSBR := m2[OccTypeName]; okSBR {
-			occtypeSBR = otSBR
+		if otMV, okMV := m2[OccTypeName]; okMV {
+			occtypeMV = otMV
 		} else {
-			msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 91)"
+			msg := "Defining OcctypeMV failed (structureprovider/interfaces.go line 91)"
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
 	}
 
 	s.OccType = occtype
-	s.OccTypeSBR = occtypeSBR
+	s.OccTypeMultiVariate = occtypeMV
 	s.CBFips = f.FieldAsString(idxs[1])
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {
@@ -150,7 +149,7 @@ func swapOcctypeMap(
 func featuretoDeterministicStructure(
 	f *gdal.Feature,
 	m map[string]structures.OccupancyTypeDeterministic,
-	m2 map[string]structures.OccupancyTypeSBR,
+	m2 map[string]structures.OccupancyTypeMultiVariate,
 	defaultOcctype structures.OccupancyTypeDeterministic,
 	idxs []int,
 	oidxs []int,
@@ -160,7 +159,7 @@ func featuretoDeterministicStructure(
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
-	var occtypeSBR = structures.OccupancyTypeSBR{}
+	var occtypeMV = structures.OccupancyTypeMultiVariate{}
 	//dont have access to foundation type in the structure schema yet.
 	if idxs[9] > 0 {
 		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
@@ -175,14 +174,13 @@ func featuretoDeterministicStructure(
 				//return s, errors.New(msg)
 			}
 		}
-		if otfsbr, okfsbr := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfsbr {
-			occtypeSBR = otfsbr
+		if otfMV, okfMV := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfMV {
+			occtypeMV = otfMV
 		} else {
-			if otSBR, okSBR := m2[OccTypeName]; okSBR {
-				occtypeSBR = otSBR
+			if otMV, okMV := m2[OccTypeName]; okMV {
+				occtypeMV = otMV
 			} else {
-				// occtypeSBR = structures.OccupancyTypeSBR{}
-				msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 74)"
+				msg := "Defining OcctypeMV failed (structureprovider/interfaces.go line 181)"
 				fmt.Println(msg)
 				//return s, errors.New(msg)
 			}
@@ -196,17 +194,17 @@ func featuretoDeterministicStructure(
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
-		if otSBR, okSBR := m2[OccTypeName]; okSBR {
-			occtypeSBR = otSBR
+		if otMV, okMV := m2[OccTypeName]; okMV {
+			occtypeMV = otMV
 		} else {
-			msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 91)"
+			msg := "Defining OcctypeMV failed (structureprovider/interfaces.go line 91)"
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
 	}
 
 	s.OccType = occtype
-	s.OccTypeSBR = occtypeSBR
+	s.OccTypeMultiVariate = occtypeMV
 	s.CBFips = f.FieldAsString(idxs[1])
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {

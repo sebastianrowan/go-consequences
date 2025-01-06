@@ -28,7 +28,7 @@ type StructureStochastic struct {
 	BaseStructure
 	UseUncertainty                        bool //defaults to false!
 	OccType                               OccupancyTypeStochastic
-	OccTypeSBR                            OccupancyTypeSBR
+	OccTypeMultiVariate                   OccupancyTypeMultiVariate
 	FoundType, FirmZone, ConstructionType string
 	StructVal, ContVal, FoundHt           consequences.ParameterValue
 	NumStories                            int32
@@ -75,7 +75,7 @@ func (f *StructureStochastic) ApplyFoundationHeightUncertanty(fu *FoundationUnce
 type StructureDeterministic struct {
 	BaseStructure
 	OccType                               OccupancyTypeDeterministic
-	OccTypeSBR                            OccupancyTypeSBR
+	OccTypeMultiVariate                   OccupancyTypeMultiVariate
 	FoundType, FirmZone, ConstructionType string
 	StructVal, ContVal, FoundHt           float64
 	NumStories                            int32
@@ -110,17 +110,17 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 	}
 
 	return StructureDeterministic{
-		OccType:          ot,
-		OccTypeSBR:       s.OccTypeSBR,
-		StructVal:        sv,
-		ContVal:          cv,
-		FoundType:        s.FoundType,
-		ConstructionType: s.ConstructionType,
-		FirmZone:         s.FirmZone,
-		FoundHt:          fh,
-		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
-		NumStories:       s.NumStories,
-		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		OccType:             ot,
+		OccTypeMultiVariate: s.OccTypeMultiVariate,
+		StructVal:           sv,
+		ContVal:             cv,
+		FoundType:           s.FoundType,
+		ConstructionType:    s.ConstructionType,
+		FirmZone:            s.FirmZone,
+		FoundHt:             fh,
+		PopulationSet:       PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
+		NumStories:          s.NumStories,
+		BaseStructure:       BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreStochastic
@@ -128,8 +128,8 @@ func (s StructureStochastic) Compute(d hazards.HazardEvent) (consequences.Result
 	return s.SampleStructure(rand.Int63()).Compute(d) //this needs work so seeds can be controlled.
 }
 
-func (s StructureStochastic) ComputeSBR(d hazards.HazardEvent) (consequences.Result, error) {
-	return s.SampleStructure(rand.Int63()).ComputeSBR(d) //this needs work so seeds can be controlled.
+func (s StructureStochastic) ComputeMultiVariate(d hazards.HazardEvent) (consequences.Result, error) {
+	return s.SampleStructure(rand.Int63()).ComputeMultiVariate(d) //this needs work so seeds can be controlled.
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
@@ -142,12 +142,12 @@ func (s StructureDeterministic) Compute(d hazards.HazardEvent) (consequences.Res
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
-func (s StructureDeterministic) ComputeSBR(d hazards.HazardEvent) (consequences.Result, error) {
+func (s StructureDeterministic) ComputeMultiVariate(d hazards.HazardEvent) (consequences.Result, error) {
 	/*add, addok := d.(hazards.ArrivalDepthandDurationEvent)
 	if addok {
 		return computeConsequencesWithReconstruction(add, s)
 	}*/
-	return computeConsequencesSBR(d, s)
+	return computeConsequencesMultiVariate(d, s)
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreDeterminstic
@@ -282,7 +282,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	return ret, err
 }
 
-func computeConsequencesSBR(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
+func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_emissions"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
@@ -307,7 +307,7 @@ func computeConsequencesSBR(e hazards.HazardEvent, s StructureDeterministic) (co
 		return ret, ghgerr
 	}
 
-	ghgDamFun2, ghgerr2 := s.OccTypeSBR.GetComponentDamageFunctionForHazardSBR("greenhouse_gas2")
+	ghgDamFun2, ghgerr2 := s.OccTypeMultiVariate.GetComponentDamageFunctionForHazardMultiVariate("greenhouse_gas2")
 	if ghgerr2 != nil {
 		fmt.Println(ghgDamFun2)
 		return ret, ghgerr

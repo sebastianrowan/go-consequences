@@ -259,7 +259,7 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 		}
 	}
 }
-func StreamAbstractSBR(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+func StreamAbstractMultiVariate(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
 	bbox, err := hp.HazardBoundary()
@@ -272,7 +272,7 @@ func StreamAbstractSBR(hp hazardproviders.HazardProvider, sp consequences.Stream
 		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
 		//compute damages based on hazard being able to provide depth
 		if err2 == nil {
-			r, err3 := f.ComputeSBR(d)
+			r, err3 := f.ComputeMultiVariate(d)
 			if err3 == nil {
 				w.Write(r)
 			}

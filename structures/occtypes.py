@@ -20,34 +20,15 @@ def build_null_df(df):
                 "source": "Rowan et al. (2024a)",
                 "damagedriver": "depth",
                 "damagefunction": {
-<<<<<<< HEAD
                     "xvalues":[0,0],
                     "ydistributions": [
                         {"type": "NormalDistribution","parameters":{"mean": 0,"sd": 0}},
                         {"type": "NormalDistribution","parameters":{"mean": 0,"sd": 0}}
                     ]
-=======
-                    "xvalues":[],
-                    "ydistributions": []
->>>>>>> c0b91f6433e8f44f5e664cdae5a31bd607f6dc74
                 }
             }
         }
     }
-<<<<<<< HEAD
-=======
-    
-    for i, row in df.iterrows():
-        ydist = {
-            "type": "NormalDistribution",
-            "parameters":{
-                "mean": 0,
-                "sd": 0
-            }
-        }
-        output['damagefunctions']['depth']['damagefunction']['xvalues'].append(row['flood_depth'])
-        output['damagefunctions']['depth']['damagefunction']['ydistributions'].append(ydist)
->>>>>>> c0b91f6433e8f44f5e664cdae5a31bd607f6dc74
 
     return(output)
 

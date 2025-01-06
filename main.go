@@ -37,6 +37,6 @@ func main() {
 	})
 	//compute consequences.
 	fmt.Println("running compute.StreamAbstract")
-	compute.StreamAbstractSBR(dfr, nsp, w)
+	compute.StreamAbstractMultiVariate(dfr, nsp, w)
 	fmt.Println(time.Since(now))
 }

@@ -11,7 +11,7 @@ type IPrototype interface {
 
 type OccupancyTypeProvider interface {
 	OccupancyTypeMap() map[string]OccupancyTypeStochastic
-	OccupancyTypeMapSBR() map[string]OccupancyTypeSBR
+	OccupancyTypeMapMultiVariate() map[string]OccupancyTypeMultiVariate
 	Write(outputpath string) error
 }
 
@@ -79,24 +79,24 @@ type DamageVector struct {
 	Depth_n_car  float64 `json:"depth_n_car"`
 }
 
-type DamageFunctionSBR struct {
+type DamageFunctionMultiVariate struct {
 	Source           string            `json:"source"`
 	DamageDriver     hazards.Parameter `json:"damagedriver"`
 	DamageVectorMean DamageVector      `json:"damagevectormean"`
 	DamageVectorSD   DamageVector      `json:"damagevectorsd"`
 }
 
-type DamageFunctionFamilySBR struct {
-	DamageFunctions map[string]DamageFunctionSBR `json:"damagefunctions"`
+type DamageFunctionFamilyMultiVariate struct {
+	DamageFunctions map[string]DamageFunctionMultiVariate `json:"damagefunctions"`
 }
 
-type OccupancyTypeSBR struct {
-	Name                     string                             `json:"name"`
-	ComponentDamageFunctions map[string]DamageFunctionFamilySBR `json:"componentdamagefunctions"`
+type OccupancyTypeMultiVariate struct {
+	Name                     string                                      `json:"name"`
+	ComponentDamageFunctions map[string]DamageFunctionFamilyMultiVariate `json:"componentdamagefunctions"`
 }
 
-type OccupancyTypesContainerSBR struct {
-	OccupancyTypes map[string]OccupancyTypeSBR `json:"occupancytypes"`
+type OccupancyTypesContainerMultiVariate struct {
+	OccupancyTypes map[string]OccupancyTypeMultiVariate `json:"occupancytypes"`
 }
 
 //////////////////////////////////////
