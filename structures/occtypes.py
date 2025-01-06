@@ -20,7 +20,7 @@ def build_null_df(df):
                 "source": "Rowan et al. (2024a)",
                 "damagedriver": "depth",
                 "damagefunction": {
-                    "xvalues":[-2,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+                    "xvalues":[],
                     "ydistributions": []
                 }
             }
@@ -35,7 +35,7 @@ def build_null_df(df):
                 "sd": 0
             }
         }
-
+        output['damagefunctions']['depth']['damagefunction']['xvalues'].append(row['flood_depth'])
         output['damagefunctions']['depth']['damagefunction']['ydistributions'].append(ydist)
 
     return(output)
@@ -79,30 +79,35 @@ def build_mv_damage_function():
                 "source": "Rowan et al. (2024a)",
                 "damagedriver": "depth",
                 "damagefunction": {
-                    "mean_params": {
-                        "intercept": 1,
-                        "depth": 2,
-                        "sqft": 3,
-                        "n_bed": 4,
-                        "n_bath": 5,
-                        "n_car": 6,
-                        "depth_sqft": 7,
-                        "depth_n_bed": 8,
-                        "depth_n_bath": 9,
-                        "depth_n_car": 10
-                    },
-                    "sd_params": {
-                        "intercept": 10,
-                        "depth": 20,
-                        "sqft": 30,
-                        "n_bed": 40,
-                        "n_bath": 50,
-                        "n_car": 60,
-                        "depth_sqft": 70,
-                        "depth_n_bed": 80,
-                        "depth_n_bath": 90,
-                        "depth_n_car": 0
-                    }
+                    "xvalues":[1,2],
+                    "ydistributions": [
+                        {"type": "NormalDistribution","parameters":{"mean": 10,"sd": 0.1}},
+                        {"type": "NormalDistribution","parameters":{"mean": 20,"sd": 0.2}}
+                    ]
+                },
+                "damagevectormean": {
+                    "intercept": 11,
+                    "depth": 12,
+                    "sqft": 13,
+                    "n_bed": 14,
+                    "n_bath": 15,
+                    "n_car": 16,
+                    "depth_sqft": 17,
+                    "depth_n_bed": 18,
+                    "depth_n_bath": 19,
+                    "depth_n_car": 20
+                },
+                "damagevectorsd": {
+                    "intercept": 1,
+                    "depth": 1,
+                    "sqft": 1,
+                    "n_bed": 1,
+                    "n_bath": 1,
+                    "n_car": 1,
+                    "depth_sqft": 1,
+                    "depth_n_bed": 1,
+                    "depth_n_bath": 1,
+                    "depth_n_car": 1
                 }
             }
         }
@@ -130,7 +135,7 @@ def print_dfs():
 def main():
 
     dfs = pd.read_parquet("rowan_2024a_dmg_fns.parquet")
-    with open("occtypes.json", "r") as f:
+    with open("occtypes_original.json", "r") as f:
         occtypes = json.load(f)
 
     dfs['co2_cost_pct_sd'] = (dfs['co2_cost_pct_mean'] - dfs['co2_cost_pct_low']) / 1.96
