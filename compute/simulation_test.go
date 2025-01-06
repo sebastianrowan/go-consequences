@@ -137,13 +137,12 @@ func Test_StreamAbstract(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
-	//nsp, _ := structureprovider.InitStructureProvider("/workspaces/Go_Consequences/data/ffrd/Lower Kanawha-Elk Lower.gpkg", "Lower Kanawha-Elk Lower", "GPKG")
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
 	root := "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped"
 	filepath := root + ".tif"
-  w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequences.gpkg", "results", "GPKG")
-	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
+  //w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()

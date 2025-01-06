@@ -1,5 +1,9 @@
 package structures
 
+import (
+	"github.com/USACE/go-consequences/hazards"
+)
+
 // Common interface for all damage function providers
 type IPrototype interface {
 	DamageFunction(component string) DamageFunction // component = structure, content, vehicle, etc.
@@ -7,6 +11,7 @@ type IPrototype interface {
 
 type OccupancyTypeProvider interface {
 	OccupancyTypeMap() map[string]OccupancyTypeStochastic
+	OccupancyTypeMapSBR() map[string]OccupancyTypeSBR
 	Write(outputpath string) error
 }
 
@@ -59,6 +64,39 @@ type FunctionDD struct {
 		UncertaintyType string     `json:"UncertaintyType"`
 		Ordinates       []Ordinate `json:"Ordinate"`
 	} `json:"MonotonicCurveUSingle"`
+}
+
+type DamageVector struct {
+	Intercept    float64 `json:"intercept"`
+	Depth        float64 `json:"depth"`
+	Sqft         float64 `json:"sqft"`
+	N_bed        float64 `json:"n_bed"`
+	N_bath       float64 `json:"n_bath"`
+	N_car        float64 `json:"n_car"`
+	Depth_sqft   float64 `json:"depth_sqft"`
+	Depth_n_bed  float64 `json:"depth_n_bed"`
+	Depth_n_bath float64 `json:"depth_n_bath"`
+	Depth_n_car  float64 `json:"depth_n_car"`
+}
+
+type DamageFunctionSBR struct {
+	Source           string            `json:"source"`
+	DamageDriver     hazards.Parameter `json:"damagedriver"`
+	DamageVectorMean DamageVector      `json:"damagevectormean"`
+	DamageVectorSD   DamageVector      `json:"damagevectorsd"`
+}
+
+type DamageFunctionFamilySBR struct {
+	DamageFunctions map[string]DamageFunctionSBR `json:"damagefunctions"`
+}
+
+type OccupancyTypeSBR struct {
+	Name                     string                             `json:"name"`
+	ComponentDamageFunctions map[string]DamageFunctionFamilySBR `json:"componentdamagefunctions"`
+}
+
+type OccupancyTypesContainerSBR struct {
+	OccupancyTypes map[string]OccupancyTypeSBR `json:"occupancytypes"`
 }
 
 //////////////////////////////////////
