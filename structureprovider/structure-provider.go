@@ -126,6 +126,7 @@ func (gpk gdalDataSet) ByFips(fipscode string, sp consequences.StreamProcessor) 
 }
 func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
+	m2 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -142,7 +143,7 @@ func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.Stream
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s, err := featuretoStructure(f, m, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			s.ApplyFoundationHeightUncertanty(gpk.FoundationUncertainty)
 			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
@@ -155,6 +156,8 @@ func (gpk gdalDataSet) processFipsStream(fipscode string, sp consequences.Stream
 func (gpk gdalDataSet) processFipsStreamDeterministic(fipscode string, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
+	m3 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
+
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]
 	idx := 0
@@ -170,7 +173,7 @@ func (gpk gdalDataSet) processFipsStreamDeterministic(fipscode string, sp conseq
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s, err := featuretoDeterministicStructure(f, m2, m3, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}
@@ -187,6 +190,7 @@ func (gpk gdalDataSet) ByBbox(bbox geography.BBox, sp consequences.StreamProcess
 }
 func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
+	m2 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
 	idx := 0
@@ -198,7 +202,7 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoStructure(f, m, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s, err := featuretoStructure(f, m, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			s.ApplyFoundationHeightUncertanty(gpk.FoundationUncertainty)
 			s.UseUncertainty = true
 			sd := s.SampleStructure(r.Int63())
@@ -212,6 +216,7 @@ func (gpk gdalDataSet) processBboxStream(bbox geography.BBox, sp consequences.St
 func (gpk gdalDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp consequences.StreamProcessor) {
 	m := gpk.OccTypeProvider.OccupancyTypeMap()
 	m2 := swapOcctypeMap(m)
+	m3 := gpk.OccTypeProvider.OccupancyTypeMapSBR()
 	//define a default occtype in case of emergancy
 	defaultOcctype := m2["RES1-1SNB"]
 	idx := 0
@@ -222,7 +227,7 @@ func (gpk gdalDataSet) processBboxStreamDeterministic(bbox geography.BBox, sp co
 		f := l.NextFeature()
 		idx++
 		if f != nil {
-			s, err := featuretoDeterministicStructure(f, m2, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
+			s, err := featuretoDeterministicStructure(f, m2, m3, defaultOcctype, gpk.schemaIDX, gpk.optionalSchemaIDX)
 			if err == nil {
 				sp(s)
 			}

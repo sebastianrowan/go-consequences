@@ -39,6 +39,7 @@ func OptionalSchema() []string {
 func featuretoStructure(
 	f *gdal.Feature,
 	m map[string]structures.OccupancyTypeStochastic,
+	m2 map[string]structures.OccupancyTypeSBR,
 	defaultOcctype structures.OccupancyTypeStochastic,
 	idxs []int,
 	oidxs []int,
@@ -48,6 +49,7 @@ func featuretoStructure(
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
+	var occtypeSBR = structures.OccupancyTypeSBR{}
 	//dont have access to foundation type in the structure schema yet.
 	if idxs[9] > 0 {
 		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
@@ -62,6 +64,18 @@ func featuretoStructure(
 				//return s, errors.New(msg)
 			}
 		}
+		if otfsbr, okfsbr := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfsbr {
+			occtypeSBR = otfsbr
+		} else {
+			if otSBR, okSBR := m2[OccTypeName]; okSBR {
+				occtypeSBR = otSBR
+			} else {
+				// occtypeSBR = structures.OccupancyTypeSBR{}
+				msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 74)"
+				fmt.Println(msg)
+				//return s, errors.New(msg)
+			}
+		}
 	} else {
 		if ot, ok := m[OccTypeName]; ok {
 			occtype = ot
@@ -71,9 +85,17 @@ func featuretoStructure(
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
+		if otSBR, okSBR := m2[OccTypeName]; okSBR {
+			occtypeSBR = otSBR
+		} else {
+			msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 91)"
+			fmt.Println(msg)
+			//return s, errors.New(msg)
+		}
 	}
 
 	s.OccType = occtype
+	s.OccTypeSBR = occtypeSBR
 	s.CBFips = f.FieldAsString(idxs[1])
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {
@@ -128,6 +150,7 @@ func swapOcctypeMap(
 func featuretoDeterministicStructure(
 	f *gdal.Feature,
 	m map[string]structures.OccupancyTypeDeterministic,
+	m2 map[string]structures.OccupancyTypeSBR,
 	defaultOcctype structures.OccupancyTypeDeterministic,
 	idxs []int,
 	oidxs []int,
@@ -137,6 +160,7 @@ func featuretoDeterministicStructure(
 	s.Name = fmt.Sprintf("%v", f.FieldAsInteger(idxs[0]))
 	OccTypeName := f.FieldAsString(idxs[5])
 	var occtype = defaultOcctype
+	var occtypeSBR = structures.OccupancyTypeSBR{}
 	//dont have access to foundation type in the structure schema yet.
 	if idxs[9] > 0 {
 		if otf, okf := m[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okf {
@@ -151,6 +175,18 @@ func featuretoDeterministicStructure(
 				//return s, errors.New(msg)
 			}
 		}
+		if otfsbr, okfsbr := m2[OccTypeName+"-"+f.FieldAsString(idxs[9])]; okfsbr {
+			occtypeSBR = otfsbr
+		} else {
+			if otSBR, okSBR := m2[OccTypeName]; okSBR {
+				occtypeSBR = otSBR
+			} else {
+				// occtypeSBR = structures.OccupancyTypeSBR{}
+				msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 74)"
+				fmt.Println(msg)
+				//return s, errors.New(msg)
+			}
+		}
 	} else {
 		if ot, ok := m[OccTypeName]; ok {
 			occtype = ot
@@ -160,9 +196,17 @@ func featuretoDeterministicStructure(
 			fmt.Println(msg)
 			//return s, errors.New(msg)
 		}
+		if otSBR, okSBR := m2[OccTypeName]; okSBR {
+			occtypeSBR = otSBR
+		} else {
+			msg := "Defining OcctypeSBR failed (structureprovider/interfaces.go line 91)"
+			fmt.Println(msg)
+			//return s, errors.New(msg)
+		}
 	}
 
 	s.OccType = occtype
+	s.OccTypeSBR = occtypeSBR
 	s.CBFips = f.FieldAsString(idxs[1])
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {

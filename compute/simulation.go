@@ -259,3 +259,23 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 		}
 	}
 }
+func StreamAbstractSBR(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	//get boundingbox
+	fmt.Println("Getting bbox")
+	bbox, err := hp.HazardBoundary()
+	if err != nil {
+		log.Panicf("Unable to get the raster bounding box: %s", err)
+	}
+	fmt.Println(bbox.ToString())
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
+		//ProvideHazard works off of a geography.Location
+		d, err2 := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+		//compute damages based on hazard being able to provide depth
+		if err2 == nil {
+			r, err3 := f.ComputeSBR(d)
+			if err3 == nil {
+				w.Write(r)
+			}
+		}
+	})
+}
