@@ -335,7 +335,6 @@ func computeConsequencesSBR(e hazards.HazardEvent, s StructureDeterministic) (co
 		//they exist!
 		sdampercent := 0.0
 		cdampercent := 0.0
-
 		depthAboveFFE := 0.0
 		// mvsDamage := 0.0
 		ghgEmissions := 0.0
