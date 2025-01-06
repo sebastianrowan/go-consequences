@@ -12,7 +12,7 @@ import (
 // for testing with Github action
 ///const path = "./data/occtypes.json"
 
-const path2 = "./data/erosion_trial8.json"
+const path2 = "/workspaces/go-consequences/structures/occtypes.json"
 
 // for testing locally
 //const path = "/workspaces/Go_Consequences/data/occtypes.json"
@@ -32,6 +32,7 @@ func Test_JsonReading(t *testing.T) {
 		}
 	}
 }
+
 func Test_ModifyDefault(t *testing.T) {
 	jotp := JsonOccupancyTypeProvider{}
 	jotp.InitDefault()
