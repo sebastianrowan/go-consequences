@@ -70,8 +70,7 @@ func featuretoStructure(
 			if otMV, okMV := m2[OccTypeName]; okMV {
 				occtypeMV = otMV
 			} else {
-				msg := "Defining occtypeMV failed (structureprovider/interfaces.go line 74)"
-				fmt.Println(msg)
+				fmt.Println("Defining occtypeMV failed for OcctypeName:", OccTypeName, "(structureprovider/interfaces.go line 74)")
 				//return s, errors.New(msg)
 			}
 		}

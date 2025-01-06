@@ -2,8 +2,7 @@
     "structure_provider_info": {
         "structure_provider_driver": "GPKG",
         "structure_provider_type": "GPKG",
-        "structure_file_path": "./data/burlington-davenport-nsi.gpkg",
-        "occtype_file_path": "/workspaces/go-consequences/structures/occtypes.json",
+        "structure_file_path": "/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg",
         "layername": "nsi-clipped"
     },
     "hazard_provider_info": {
@@ -15,7 +14,9 @@
         ]
     },
     "results_writer_info": {
+        "results_writer_driver": "GPKG",
         "results_writer_type": "GPKG",
         "output_file_path": "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped_Consequences.gpkg"
-    }
+    },
+    "multivariate":false
 }
