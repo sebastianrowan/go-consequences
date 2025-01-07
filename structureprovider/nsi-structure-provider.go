@@ -103,6 +103,7 @@ func (nsp nsiStreamProvider) ByJsonPost(jsonbody string, sp consequences.StreamP
 }
 func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.StreamProcessor) {
 	m := nsp.OccTypeProvider.OccupancyTypeMap()
+	m2 := nsp.OccTypeProvider.OccupancyTypeMapMultiVariate()
 	fmt.Println(url)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -130,11 +131,12 @@ func (nsp nsiStreamProvider) nsiStructureStream(url string, sp consequences.Stre
 				break
 			}
 		}
-		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
+		sp(NsiFeaturetoStructure(n, m, m2, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}
 }
 func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, sp consequences.StreamProcessor) {
 	m := nsp.OccTypeProvider.OccupancyTypeMap()
+	m2 := nsp.OccTypeProvider.OccupancyTypeMapMultiVariate()
 	fmt.Println(url)
 	//define a default occtype in case of emergancy
 	defaultOcctype := m["RES1-1SNB"]
@@ -162,13 +164,14 @@ func (nsp nsiStreamProvider) nsiPostStructureStream(url string, body io.Reader, 
 				break
 			}
 		}
-		sp(NsiFeaturetoStructure(n, m, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
+		sp(NsiFeaturetoStructure(n, m, m2, defaultOcctype, nsp.UseUncertainty, nsp.FoundationUncertainty))
 	}
 }
 
 // NsiFeaturetoStructure converts an nsi.NsiFeature to a structures.Structure
-func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, defaultOcctype structures.OccupancyTypeStochastic, useUncertainty bool, fh *structures.FoundationUncertainty) structures.StructureStochastic {
+func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeStochastic, m2 map[string]structures.OccupancyTypeMultiVariate, defaultOcctype structures.OccupancyTypeStochastic, useUncertainty bool, fh *structures.FoundationUncertainty) structures.StructureStochastic {
 	var occtype = defaultOcctype
+	var occtypeMV = structures.OccupancyTypeMultiVariate{}
 	if otf, okf := m[f.Properties.Occtype+"-"+f.Properties.FoundType]; okf {
 		occtype = otf
 	} else {
@@ -180,14 +183,25 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 			fmt.Print(msg) //panic(msg)
 		}
 	}
+	if otfMV, okfMV := m2[f.Properties.Occtype+"-"+f.Properties.FoundType]; okfMV {
+		occtypeMV = otfMV
+	} else {
+		if otMV, okMV := m2[f.Properties.Occtype]; okMV {
+			occtypeMV = otMV
+		} else {
+			msg := "Multivariate occtype for" + f.Properties.Occtype + "not found"
+			fmt.Print(msg) //panic(msg)
+		}
+	}
 	s := structures.StructureStochastic{
-		OccType:          occtype,
-		StructVal:        consequences.ParameterValue{Value: f.Properties.StructVal},
-		ContVal:          consequences.ParameterValue{Value: f.Properties.ContVal},
-		FoundHt:          consequences.ParameterValue{Value: f.Properties.FoundHt},
-		FoundType:        f.Properties.FoundType,
-		ConstructionType: f.Properties.ConstructionType,
-		FirmZone:         f.Properties.FirmZone,
+		OccType:             occtype,
+		OccTypeMultiVariate: occtypeMV,
+		StructVal:           consequences.ParameterValue{Value: f.Properties.StructVal},
+		ContVal:             consequences.ParameterValue{Value: f.Properties.ContVal},
+		FoundHt:             consequences.ParameterValue{Value: f.Properties.FoundHt},
+		FoundType:           f.Properties.FoundType,
+		ConstructionType:    f.Properties.ConstructionType,
+		FirmZone:            f.Properties.FirmZone,
 		PopulationSet: structures.PopulationSet{
 			Pop2pmo65: f.Properties.Pop2pmo65,
 			Pop2pmu65: f.Properties.Pop2pmu65,

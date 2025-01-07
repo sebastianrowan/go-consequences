@@ -276,11 +276,13 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 	// }
 	ghgDamFun, ghgerr := s.OccType.GetComponentDamageFunctionForHazard("greenhouse_gas", e)
 	if ghgerr != nil {
+		fmt.Println("Could not get base GHG function")
 		return ret, ghgerr
 	}
 
 	ghgDamFun2, ghgerr2 := s.OccTypeMultiVariate.GetComponentDamageFunctionForHazardMultiVariate("greenhouse_gas2")
 	if ghgerr2 != nil {
+		fmt.Println("Could not get multi-variate GHG function for ", s.OccTypeMultiVariate.Name)
 		fmt.Println(ghgDamFun2)
 		return ret, ghgerr
 	}
