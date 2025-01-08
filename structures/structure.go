@@ -17,6 +17,7 @@ type BaseStructure struct {
 	Name                  string
 	DamCat                string
 	CBFips                string
+	Sqft                  float64
 	X, Y, GroundElevation float64
 }
 type PopulationSet struct {
@@ -120,7 +121,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		FoundHt:             fh,
 		PopulationSet:       PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:          s.NumStories,
-		BaseStructure:       BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		BaseStructure:       BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreStochastic
@@ -162,7 +163,7 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		FoundHt:          s.FoundHt,
 		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:       s.NumStories,
-		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
@@ -288,10 +289,11 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 	}
 
 	dv_mean := ghgDamFun2.DamageVectorMean
-	dv_sd := ghgDamFun2.DamageVectorSD
+	// dv_sd := ghgDamFun2.DamageVectorSD
 
-	fmt.Println(dv_mean)
-	fmt.Println(dv_sd)
+	dv_mean_depth := dv_mean.Depth
+	dv_mean_sqft := dv_mean.Sqft
+	dv_mean_depth_sqft := dv_mean.Depth_sqft
 
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
@@ -318,6 +320,15 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
 			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
 			ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
+
+			ghg_mean := (dv_mean_depth * depthAboveFFE) + (dv_mean_sqft * s.Sqft) + (dv_mean_depth_sqft * depthAboveFFE * s.Sqft)
+
+			if depthAboveFFE > 0 {
+				fmt.Println("Depth:", depthAboveFFE)
+				fmt.Println("Sqft:", s.Sqft)
+				fmt.Println("GHG (base):", ghgEmissions)
+				fmt.Println("GHG (mean):", ghg_mean)
+			}
 
 			// ghgEmissions = 1
 			// if e.Has(mvsDamFun.DamageDriver) && e.Has(ghgDamFun.DamageDriver) {

@@ -24,6 +24,7 @@ type NsiProperties struct {
 	FoundHt          float64 `json:"found_ht"`
 	FoundType        string  `json:"found_type"`
 	DamCat           string  `json:"st_damcat"`
+	Sqft             float64 `json:"sqft"`
 	StructVal        float64 `json:"val_struct"`
 	ContVal          float64 `json:"val_cont"`
 	CB               string  `json:"cbfips"`
@@ -212,6 +213,7 @@ func NsiFeaturetoStructure(f NsiFeature, m map[string]structures.OccupancyTypeSt
 			Name:            strconv.Itoa(f.Properties.Name),
 			CBFips:          f.Properties.CB,
 			DamCat:          f.Properties.DamCat,
+			Sqft:            f.Properties.Sqft,
 			X:               f.Properties.X,
 			Y:               f.Properties.Y,
 			GroundElevation: f.Properties.GroundElevation,

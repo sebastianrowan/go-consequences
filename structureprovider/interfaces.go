@@ -9,7 +9,7 @@ import (
 )
 
 func StructureSchema() []string {
-	s := make([]string, 10)
+	s := make([]string, 11)
 	s[0] = "fd_id"
 	s[1] = "cbfips"
 	s[2] = "x"
@@ -20,6 +20,7 @@ func StructureSchema() []string {
 	s[7] = "val_cont"
 	s[8] = "found_ht"
 	s[9] = "found_type"
+	s[10] = "sqft"
 	return s
 }
 
@@ -91,9 +92,13 @@ func featuretoStructure(
 			//return s, errors.New(msg)
 		}
 	}
-
+	sqft := 0.0
+	if idxs[10] > 0 {
+		sqft = f.FieldAsFloat64(idxs[10])
+	}
 	s.OccType = occtype
 	s.OccTypeMultiVariate = occtypeMV
+	s.Sqft = sqft
 	s.CBFips = f.FieldAsString(idxs[1])
 	g := f.Geometry()
 	if g.IsNull() || g.IsEmpty() {
