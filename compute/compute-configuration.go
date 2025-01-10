@@ -76,7 +76,7 @@ func (computable Computeable) Compute() error {
 		StreamAbstractMultiVariate(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter)
 	} else {
 		StreamAbstract(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter) //bybbox. need to add logic for fips.
-		computable.ResultsWriter.Close()
+		// computable.ResultsWriter.Close() // this is called in main.go
 	}
 
 	return nil

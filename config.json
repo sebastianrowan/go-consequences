@@ -18,5 +18,5 @@
         "results_writer_type": "GPKG",
         "output_file_path": "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped_Consequences.gpkg"
     },
-    "multivariate":true
+    "multivariate":false
 }
