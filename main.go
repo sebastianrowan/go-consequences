@@ -1,7 +1,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
 	"time"
 
 	"github.com/USACE/go-consequences/compute"
@@ -11,7 +14,40 @@ import (
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
+/*
+//Config describes the configuration settings for go-consequences.
+
+	type Config struct {
+		SkipJWT       bool
+		LambdaContext bool
+		DBUser        string
+		DBPass        string
+		DBName        string
+		DBHost        string
+		DBSSLMode     string
+	}
+*/
 func main() {
+	fp := os.Args[1]
+	b, err := os.ReadFile(fp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var config compute.Config
+	json.Unmarshal(b, &config)
+	computable, err := config.CreateComputable()
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer computable.ResultsWriter.Close()
+	defer computable.HazardProvider.Close()
+	err = computable.Compute()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func main2() {
 	//initialize the NSI API structure provider
 	// nsp := structureprovider.InitNSISP()
 	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg", "nsi-clipped", "GPKG")
@@ -37,6 +73,7 @@ func main() {
 	})
 	//compute consequences.
 	fmt.Println("running compute.StreamAbstract")
-	compute.StreamAbstractMultiVariate(dfr, nsp, w)
+	compute.StreamAbstract(dfr, nsp, w)
+	// compute.StreamAbstractMultiVariate(dfr, nsp, w)
 	fmt.Println(time.Since(now))
 }

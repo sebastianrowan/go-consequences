@@ -22,6 +22,7 @@ type Config struct {
 	hazardproviders.HazardProviderInfo      `json:"hazard_provider_info"`
 	resultswriters.ResultsWriterInfo        `json:"results_writer_info"`
 	ComputeLifeloss                         bool    `json:"compute_lifeloss"`
+	MultiVariate                            bool    `json:"multivariate"`
 	LifelossSeed                            int64   `json:"lifeloss_seed,omitempty"`
 	ComplianceRate                          float64 `json:"warning_compliance_rate"`
 	ComputeByFips                           bool    `json:"compute_by_fips"`
@@ -32,6 +33,7 @@ type Computeable struct {
 	hazardproviders.HazardProvider
 	consequences.ResultsWriter
 	ComputeLifeloss bool
+	MultiVariate    bool
 	LifelossSeed    int64
 	ComplianceRate  float64
 	ComputeByFips   bool
@@ -56,6 +58,7 @@ func (config Config) CreateComputable() (Computeable, error) {
 		HazardProvider:    hp,
 		ResultsWriter:     rw,
 		ComputeLifeloss:   config.ComputeLifeloss,
+		MultiVariate:      config.MultiVariate,
 		LifelossSeed:      config.LifelossSeed,
 		ComplianceRate:    config.ComplianceRate,
 		ComputeByFips:     config.ComputeByFips,
@@ -69,9 +72,11 @@ func (computable Computeable) Compute() error {
 		} else {
 			return computable.computeWithLifelossByBbox(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter)
 		}
+	} else if computable.MultiVariate {
+		StreamAbstractMultiVariate(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter)
 	} else {
 		StreamAbstract(computable.HazardProvider, computable.StructureProvider, computable.ResultsWriter) //bybbox. need to add logic for fips.
-		computable.ResultsWriter.Close()
+		// computable.ResultsWriter.Close() // this is called in main.go
 	}
 
 	return nil

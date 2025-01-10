@@ -1,0 +1,19 @@
+{
+    "structure_provider_info": {
+        "structure_provider_type": "NSIAPI"
+    },
+    "hazard_provider_info": {
+        "hazards": [
+            {
+                "hazard_parameter_type": "depth",
+                "hazard_provider_file_path": "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped.tif"
+            }
+        ]
+    },
+    "results_writer_info": {
+        "results_writer_driver": "GPKG",
+        "results_writer_type": "GPKG",
+        "output_file_path": "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped_Consequences.gpkg"
+    },
+    "multivariate":true
+}
