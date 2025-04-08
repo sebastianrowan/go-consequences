@@ -256,6 +256,14 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 }
 
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
+	// fathom raster values are int16 type. Unit is hundredths of feet (1.25ft --> 125)
+	// need to convert e.depth value
+	new_depth := e.Depth() / 100.0
+
+	// I want to use the SetDepth function (flood.go line 17) but I don't understand it
+	// var event_pointer *hazards.DepthEvent = &e
+	// event_pointer.SetDepth(new_depth)
+
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_emissions"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
@@ -313,22 +321,16 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		cdampercent := 0.0
 		depthAboveFFE := 0.0
 		// mvsDamage := 0.0
-		ghgEmissions := 0.0
+		ghg_mean := 0.0
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
-			depthAboveFFE = e.Depth() - s.FoundHt
-			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100
-			ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			// depthAboveFFE = e.Depth() - s.FoundHt
+			depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt                         // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
+			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0 //assumes what type the damage array is in
+			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0
+			// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
 
-			ghg_mean := (dv_mean_depth * depthAboveFFE) + (dv_mean_sqft * s.Sqft) + (dv_mean_depth_sqft * depthAboveFFE * s.Sqft)
-
-			if depthAboveFFE > 0 {
-				fmt.Println("Depth:", depthAboveFFE)
-				fmt.Println("Sqft:", s.Sqft)
-				fmt.Println("GHG (base):", ghgEmissions)
-				fmt.Println("GHG (mean):", ghg_mean)
-			}
+			ghg_mean = (dv_mean_depth * depthAboveFFE) + (dv_mean_sqft * s.Sqft) + (dv_mean_depth_sqft * depthAboveFFE * s.Sqft)
 
 			// ghgEmissions = 1
 			// if e.Has(mvsDamFun.DamageDriver) && e.Has(ghgDamFun.DamageDriver) {
@@ -369,7 +371,7 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ret.Result[14] = cdampercent
 		ret.Result[15] = depthAboveFFE
 		// ret.Result[16] = mvsDamage
-		ret.Result[16] = ghgEmissions * sval
+		ret.Result[16] = ghg_mean
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
 		ret.Result[0] = s.BaseStructure.Name
