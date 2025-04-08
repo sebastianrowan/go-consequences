@@ -256,13 +256,6 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 }
 
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-	// fathom raster values are int16 type. Unit is hundredths of feet (1.25ft --> 125)
-	// need to convert e.depth value
-	new_depth := e.Depth() / 100.0
-
-	// I want to use the SetDepth function (flood.go line 17) but I don't understand it
-	// var event_pointer *hazards.DepthEvent = &e
-	// event_pointer.SetDepth(new_depth)
 
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_emissions"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0}
