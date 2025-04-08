@@ -28,6 +28,7 @@ import (
 	}
 */
 func main() {
+	start := time.Now()
 	fp := os.Args[1]
 	b, err := os.ReadFile(fp)
 	if err != nil {
@@ -45,18 +46,20 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+	elapsed := time.Since(start)
+	fmt.Println("Execution time:", elapsed)
 }
 
 func main2() {
 	//initialize the NSI API structure provider
 	// nsp := structureprovider.InitNSISP()
-	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg", "nsi-clipped", "GPKG")
+	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg", "nsi", "GPKG")
 	nsp.SetDeterministic(true)
 	now := time.Now()
 	fmt.Println(now)
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	root := "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped"
+	root := "/workspaces/go-consequences/data/burlington-davenport-100yr"
 	filepath := root + ".tif"
 	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
