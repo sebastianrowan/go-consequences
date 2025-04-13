@@ -17,7 +17,7 @@ def build_null_df(df):
     output = {
         "damagefunctions": {
             "depth": {
-                "source": "Rowan et al. (2024a)",
+                "source": "Rowan et al. (2025a)",
                 "damagedriver": "depth",
                 "damagefunction": {
                     "xvalues":[0,0],
@@ -36,7 +36,7 @@ def build_damage_function(df):
     output = {
         "damagefunctions": {
             "depth": {
-                "source": "Rowan et al. (2024a)",
+                "source": "Rowan et al. (2025a)",
                 "damagedriver": "depth",
                 "damagefunction": {
                     "xvalues":[],
@@ -64,11 +64,11 @@ def build_damage_function(df):
 
     return(output)
 
-def build_mv_ghg_damage_function1():
+def build_mv_dmg_damage_function1():
     output = {
         "damagefunctions": {
             "depth": {
-                "source": "Rowan et al. (2024a)",
+                "source": "Rowan et al. (2025b)",
                 "damagedriver": "depth",
                 "damagefunction": {
                     "xvalues":[1,2],
@@ -78,28 +78,118 @@ def build_mv_ghg_damage_function1():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 6103,
-                    "depth": 484.8,
-                    "sqft": 8.291,
-                    "n_bed": 276.1,
-                    "n_bath": -117.1,
-                    "n_car": 718.1,
-                    "depth_sqft": 0.7202,
-                    "depth_n_bed": 0,
+                    "intercept": 25920,
+                    "depth": 1656,
+                    "sqft": 20.63,
+                    "n_bed": 332.2,
+                    "n_bath": 0,
+                    "n_car": 1097,
+                    "depth_sqft": 1.884,
+                    "depth_n_bed": 63.44,
                     "depth_n_bath": 0,
-                    "depth_n_car": 0
+                    "depth_n_car": 152.2,
+                    "r-squared": 0.922
                 },
                 "damagevectorsd": {
-                    "intercept": 435.8,
-                    "depth": 38.69,
-                    "sqft": 2.352,
-                    "n_bed": -18.22,
-                    "n_bath": -15.26,
-                    "n_car": 0,
-                    "depth_sqft": 0,
+                    "intercept": 2289,
+                    "depth": 91.64,
+                    "sqft": 3.404,
+                    "n_bed": 26.9,
+                    "n_bath": -139.7,
+                    "n_car": 55.65,
+                    "depth_sqft": 0.09518,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
-                    "depth_n_car": 0
+                    "depth_n_car": 0,
+                    "r-squared": 0.9002
+                }
+            }
+        }
+    }
+    return(output)
+
+def build_mv_dmg_damage_function2():
+    output = {
+        "damagefunctions": {
+            "depth": {
+                "source": "Rowan et al. (2025b)",
+                "damagedriver": "depth",
+                "damagefunction": {
+                    "xvalues":[1,2],
+                    "ydistributions": [
+                        {"type": "NormalDistribution","parameters":{"mean": 10,"sd": 0.1}},
+                        {"type": "NormalDistribution","parameters":{"mean": 20,"sd": 0.2}}
+                    ]
+                },
+                "damagevectormean": {
+                    "intercept": 21910,
+                    "depth": 2619,
+                    "sqft": 16.43,
+                    "n_bed": 3130,
+                    "n_bath": -226.3,
+                    "n_car": 850.1,
+                    "depth_sqft": 1.816,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 124.1,
+                    "depth_n_car": 0,
+                    "r-squared": 0.9294
+                },
+                "damagevectorsd": {
+                    "intercept": 1768,
+                    "depth": 198.2,
+                    "sqft": 2.654,
+                    "n_bed": 370.3,
+                    "n_bath": 25.97,
+                    "n_car": -279.3,
+                    "depth_sqft": 0.1179,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 0,
+                    "depth_n_car": 52.41,
+                    "r-squared": 0.8711
+                }
+            }
+        }
+    }
+    return(output)
+
+def build_mv_ghg_damage_function1():
+    output = {
+        "damagefunctions": {
+            "depth": {
+                "source": "Rowan et al. (2025b)",
+                "damagedriver": "depth",
+                "damagefunction": {
+                    "xvalues":[1,2],
+                    "ydistributions": [
+                        {"type": "NormalDistribution","parameters":{"mean": 10,"sd": 0.1}},
+                        {"type": "NormalDistribution","parameters":{"mean": 20,"sd": 0.2}}
+                    ]
+                },
+                "damagevectormean": {
+                    "intercept": 6357,
+                    "depth": 428.1,
+                    "sqft": 8.308,
+                    "n_bed": 240.6,
+                    "n_bath": 0,
+                    "n_car": 753.8,
+                    "depth_sqft": 0.6985,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 0,
+                    "depth_n_car": 0,
+                    "r-squared": 0.9315
+                },
+                "damagevectorsd": {
+                    "intercept": 648.5,
+                    "depth": 10.23,
+                    "sqft": 2.254,
+                    "n_bed": -17.89,
+                    "n_bath": -18.39,
+                    "n_car": 50,
+                    "depth_sqft": 0.01342,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 0,
+                    "depth_n_car": 0,
+                    "r-squared": 0.9453
                 }
             }
         }
@@ -110,7 +200,7 @@ def build_mv_ghg_damage_function2():
     output = {
         "damagefunctions": {
             "depth": {
-                "source": "Rowan et al. (2024a)",
+                "source": "Rowan et al. (2025b)",
                 "damagedriver": "depth",
                 "damagefunction": {
                     "xvalues":[1,2],
@@ -120,39 +210,41 @@ def build_mv_ghg_damage_function2():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 6899,
-                    "depth": 395,
-                    "sqft": 8.456,
-                    "n_bed": 285.5,
-                    "n_bath": 0,
+                    "intercept": 4540,
+                    "depth": 655.6,
+                    "sqft": 6.351,
+                    "n_bed": 1145,
+                    "n_bath": 312.2,
                     "n_car": 0,
-                    "depth_sqft": 0.7067,
+                    "depth_sqft": 0.6723,
                     "depth_n_bed": 0,
-                    "depth_n_bath": -19.86,
-                    "depth_n_car": 82.05
+                    "depth_n_bath": 0,
+                    "depth_n_car": 0,
+                    "r-squared": 0.9406
                 },
                 "damagevectorsd": {
-                    "intercept": 171.3,
-                    "depth": 26.01,
-                    "sqft": 1.861,
-                    "n_bed": 186.4,
-                    "n_bath": -2.658,
-                    "n_car": -155.7,
-                    "depth_sqft": 0.01462,
-                    "depth_n_bed": -4.091,
-                    "depth_n_bath": 1.512,
-                    "depth_n_car": 6.937
+                    "intercept": 31.16,
+                    "depth": 24.59,
+                    "sqft": 1.839,
+                    "n_bed": 154.5,
+                    "n_bath": 5.034,
+                    "n_car": 0,
+                    "depth_sqft": 0.01464,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 0,
+                    "depth_n_car": 0,
+                    "r-squared": 0.8769
                 }
             }
         }
     }
     return(output)
 
-def build_mv_ghg_damage_function_null():
+def build_mv_damage_function_null():
     output = {
         "damagefunctions": {
             "depth": {
-                "source": "Rowan et al. (2024a)",
+                "source": "Rowan et al. (2025b)",
                 "damagedriver": "depth",
                 "damagefunction": {
                     "xvalues":[1,2],
@@ -226,25 +318,30 @@ def main():
     df2 = build_damage_function(dfs2)
     dfnull = build_null_df(dfs1)
 
+    df_mv_dmg1 = build_mv_dmg_damage_function1()
+    df_mv_dmg2 = build_mv_dmg_damage_function2()
     df_mv_ghg1 = build_mv_ghg_damage_function1()
     df_mv_ghg2 = build_mv_ghg_damage_function2()
-    df_mv_ghg_null = build_mv_ghg_damage_function_null()
+    df_mv_null = build_mv_damage_function_null()
     
     occtypes_out = {"occupancytypes":{}}
     for key, o in occtypes['occupancytypes'].items():
         occtypes_out["occupancytypes"][key] = o
         if(o['name'][0:7] == "RES1-1S"):
             print(f"{o['name']} getting ghg df1")
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['mv_structure'] = df_mv_dmg1
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df1
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_ghg1
         elif(o['name'][0:7] in ["RES1-2S", "RES1-3S", "RES1-SL", "RES3A", "RES3B"]):
             print(f"{o['name']} getting ghg df2")
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['mv_structure'] = df_mv_dmg2
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = df2
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_ghg2
         else:
             print(f"{o['name']} getting ghg dfnull")
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = dfnull
-            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_ghg_null
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['mv_structure'] = df_mv_null
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_null
 
     # print(occtypes_out)
     # with open("occtypes_ghgrowan2024a.json", "w") as out:

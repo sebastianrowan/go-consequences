@@ -279,3 +279,148 @@ func StreamAbstractMultiVariate(hp hazardproviders.HazardProvider, sp consequenc
 		}
 	})
 }
+
+func StreamAbstract_MultiFreq_Parallel(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+
+}
+
+func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	fmt.Printf("Computing %v frequencies\n", len(hps))
+	//ASSUMPTION hazard providers and frequencies are in the same order
+	//ASSUMPTION ordered by most frequent to least frequent event
+	//ASSUMPTION! get bounding box from largest frequency.
+
+	largestHp := hps[len(hps)-1]
+	bbox, err := largestHp.HazardBoundary()
+	if err != nil {
+		fmt.Printf("Unable to get the raster bounding box: %s", err)
+		return
+	}
+	//set up output tables for all frequencies.
+	header := []string{"fd_id", "x", "y", "damcat", "occtype", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "found_ht", "cb_id"}
+
+	for _, f := range freqs {
+		header = append(header, fmt.Sprintf("%2.6fS", f))
+		header = append(header, fmt.Sprintf("%2.6fC", f))
+		header = append(header, fmt.Sprintf("%2.6fDM", f))
+		header = append(header, fmt.Sprintf("%2.6fDS", f))
+		header = append(header, fmt.Sprintf("%2.6fGM", f))
+		header = append(header, fmt.Sprintf("%2.6fGS", f))
+		// header = append(header, fmt.Sprintf("%2.6fH", f))
+	}
+
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
+		s, sok := f.(structures.StructureStochastic)
+		if !sok {
+			return
+		}
+		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt.CentralTendency(), s.CBFips}
+
+		sEADs := make([]float64, len(freqs))
+		cEADs := make([]float64, len(freqs))
+		mean_dmg_EADs := make([]float64, len(freqs))
+		sd_dmg_EADs := make([]float64, len(freqs))
+		mean_ghg_EADs := make([]float64, len(freqs))
+		sd_ghg_EADs := make([]float64, len(freqs))
+
+		hazarddata := make([]hazards.HazardEvent, len(freqs))
+		//ProvideHazard works off of a geography.Location
+		gotWet := false
+		for index, hp := range hps {
+			d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			hazarddata = append(hazarddata, d)
+			//compute damages based on hazard being able to provide depth
+
+			if err == nil {
+				r, err3 := f.ComputeMultiVariate(d)
+				if err3 == nil {
+					gotWet = true
+					sdam, err := r.Fetch("structure damage")
+					if err != nil {
+						//panic?
+						sEADs[index] = 0.0
+					} else {
+						damage := sdam.(float64)
+						sEADs[index] = damage
+					}
+					cdam, err := r.Fetch("content damage")
+					if err != nil {
+						//panic?
+						cEADs[index] = 0.0
+					} else {
+						damage := cdam.(float64)
+						cEADs[index] = damage
+					}
+
+					dmg_mean, err := r.Fetch("dmg_mean")
+					if err != nil {
+						//panic?
+						mean_dmg_EADs[index] = 0.0
+					} else {
+						damage := dmg_mean.(float64)
+						mean_dmg_EADs[index] = damage
+					}
+
+					dmg_sd, err := r.Fetch("dmg_sd")
+					if err != nil {
+						//panic?
+						sd_dmg_EADs[index] = 0.0
+					} else {
+						damage := dmg_sd.(float64)
+						sd_dmg_EADs[index] = damage
+					}
+
+					ghg_mean, err := r.Fetch("ghg_mean")
+					if err != nil {
+						//panic?
+						mean_ghg_EADs[index] = 0.0
+					} else {
+						damage := ghg_mean.(float64)
+						mean_ghg_EADs[index] = damage
+					}
+
+					ghg_sd, err := r.Fetch("ghg_sd")
+					if err != nil {
+						//panic?
+						sd_ghg_EADs[index] = 0.0
+					} else {
+						damage := ghg_sd.(float64)
+						sd_ghg_EADs[index] = damage
+					}
+				}
+				results = append(results, sEADs[index])
+				results = append(results, cEADs[index])
+				results = append(results, mean_dmg_EADs[index])
+				results = append(results, sd_dmg_EADs[index])
+				results = append(results, mean_ghg_EADs[index])
+				results = append(results, sd_ghg_EADs[index])
+			} else {
+				//record zeros?
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+				results = append(results, 0.0)
+			}
+		}
+		sEAD := ComputeSpecialEAD(sEADs, freqs)
+		results[5] = sEAD
+		cEAD := ComputeEAD(cEADs, freqs)
+		results[6] = cEAD
+		dmg_meanEAD := ComputeSpecialEAD(mean_dmg_EADs, freqs)
+		dmg_sdEAD := ComputeSpecialEAD(sd_dmg_EADs, freqs)
+		ghg_meanEAD := ComputeSpecialEAD(mean_ghg_EADs, freqs)
+		ghg_sdEAD := ComputeSpecialEAD(sd_ghg_EADs, freqs)
+
+		results[7] = dmg_meanEAD
+		results[8] = dmg_sdEAD
+		results[9] = ghg_meanEAD
+		results[10] = ghg_sdEAD
+		var ret = consequences.Result{Headers: header, Result: results}
+		if gotWet {
+			w.Write(ret)
+		}
+
+	})
+}

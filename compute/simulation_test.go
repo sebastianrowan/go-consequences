@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -142,7 +143,7 @@ func Test_StreamAbstract(t *testing.T) {
 	root := "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped"
 	filepath := root + ".tif"
 	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
-  //w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
 	defer w.Close()
@@ -158,6 +159,137 @@ func Test_StreamAbstract(t *testing.T) {
 	StreamAbstract(dfr, nsp, w)
 	fmt.Println(time.Since(now))
 }
+func Test_StreamAbstractMultiVariate(t *testing.T) {
+	//initialize the NSI API structure provider
+	nsp := structureprovider.InitNSISP()
+	now := time.Now()
+	fmt.Println(now)
+
+	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/1in100-fluvial-undefended-2020/n32w091.tif"
+	result_path := "/workspaces/go-consequences/data/results/2020/1in100-fluvial-undefended-2020/n32w091_test.parquet"
+
+	w, _ := resultswriters.InitSpatialResultsWriter(result_path, "results", "Parquet")
+	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
+	defer w.Close()
+
+	hp, err := hazardproviders.Init(depth_grid_path)
+	if err != nil {
+		t.Fail()
+	}
+	StreamAbstractMultiVariate(hp, nsp, w)
+	fmt.Println(time.Since(now))
+}
+func Test_StreamAbstract_MultiVariateMultiFrequency(t *testing.T) {
+	//initialize the NSI API structure provider
+	dataset := "n32w092"
+	nsp := structureprovider.InitNSISP()
+
+	//initialize a set of frequencies
+	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
+	frequencies := []float64{.2, .1, .05, .02, .01, .005, .002, .001}
+
+	//specify a working directory for data
+	//root := fmt.Sprintf("/vsis3/mmc-storage-6/nsi/Kansas_Silver_Jackets/kansas_ble/%v/", dataset)
+	// root := fmt.Sprintf("/workspaces/Go_Consequences/data/kc_silverjackets/%v/", dataset)
+	root := "/workspaces/go-consequences/data/fathom/2020/"
+	//identify the depth grids to represent the frequencies.
+	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
+
+	for i, r := range rps {
+		file := fmt.Sprintf("%sFLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-FLUVIAL-DEFENDED_KNOWN-DEPTH-2020-PERCENTILE50-v3.1/%s.tif", root, r, dataset)
+		// fmt.Println(file)
+		hp, err := hazardproviders.Init(file)
+		if err != nil {
+			t.Fail()
+		}
+		hazardProviders[i] = hp
+	}
+
+	//create a result writer based on the name of the depth grid.
+	//write local
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/2020/FLUVIAL-DEFENDED_KNOWN/%v_consequences_nsi.parquet", dataset)
+	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "Parquet")
+	defer w.Close()
+	//compute consequences.
+	StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
+}
+
+func compute_FathomMultiFrequency(filename string, year string, scenario string) {
+
+	// year := "2020"
+	// year :- 2050-SSP5_8.5
+	// scenario := "FLUVIAL-DEFENDED_KNOWN"
+
+	dataset := filename[:len(filename)-4]
+
+	//initialize the NSI API structure provider
+	nsp := structureprovider.InitNSISP()
+
+	//initialize a set of frequencies
+	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
+	frequencies := []float64{.2, .1, .05, .02, .01, .005, .002, .001}
+
+	root := "/workspaces/go-consequences/data/fathom/2020/"
+	//identify the depth grids to represent the frequencies.
+	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
+
+	for i, r := range rps {
+		file := fmt.Sprintf("%sFLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-%s-DEPTH-%s-PERCENTILE50-v3.1/%s.tif", root, r, scenario, year, dataset)
+		// fmt.Println(file)
+		hp, err := hazardproviders.Init(file)
+		if err != nil {
+			log.Fatal("Failed to get hazard provider for file: ", file, "\n", err)
+		}
+		hazardProviders[i] = hp
+	}
+
+	//create a result writer based on the name of the depth grid.
+	//write local
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_nsi.parquet", year, scenario, dataset)
+	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "Parquet")
+	defer w.Close()
+	//compute consequences.
+	StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
+
+}
+func Test_ComputeFathomGrid(t *testing.T) {
+
+	content, err := os.ReadFile("/workspaces/go-consequences/data/testgrids.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var file_list []string
+	err = json.Unmarshal(content, &file_list)
+	if err != nil {
+		log.Fatal("Error during Unmarshal():", err)
+	}
+
+	for _, file := range file_list {
+		compute_FathomMultiFrequency(file, "2020", "FLUVIAL-DEFENDED_KNOWN")
+	}
+}
+
+func Test_FathomSummary(t *testing.T) {
+	nsp := structureprovider.InitNSISP()
+	now := time.Now()
+	fmt.Println(now)
+
+	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/1in100-fluvial-undefended-2020/n32w092.tif"
+	result_path := "/workspaces/go-consequences/data/results/test/1in100-fluvial-undefended-2020_n32w092_test.csv"
+
+	w, _ := resultswriters.InitSummaryResultsWriterFromFile(result_path)
+	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
+	defer w.Close()
+
+	hp, err := hazardproviders.Init(depth_grid_path)
+	if err != nil {
+		t.Fail()
+	}
+	StreamAbstractMultiVariate(hp, nsp, w)
+	fmt.Println(time.Since(now))
+}
+
 func Test_StreamAbstract_FIPS_ECAM(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	filepath := "/workspaces/Go_Consequences/data/Base.tif"
