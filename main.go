@@ -5,11 +5,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/USACE/go-consequences/compute"
 	"github.com/USACE/go-consequences/hazardproviders"
-	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
@@ -28,6 +28,60 @@ import (
 	}
 */
 
+func get_files(file_list []string) <-chan string {
+
+	out := make(chan string)
+
+	go func() {
+		for _, f := range file_list {
+			out <- f
+		}
+		close(out)
+	}()
+	return out
+}
+
+func process_file(in <-chan string) <-chan string {
+	out := make(chan string)
+	go func() {
+		for i := range in {
+			ts := time.Now()
+			compute_FathomMultiFrequency(i, "2020", "FLUVIAL-DEFENDED_KNOWN")
+			te := time.Since(ts)
+			out_str := fmt.Sprintf("Processed file: %s in %s", i, te)
+			out <- out_str
+		}
+		close(out)
+	}()
+	return out
+}
+
+func merge(cs ...<-chan string) <-chan string {
+	var wg sync.WaitGroup
+	out := make(chan string)
+
+	// Start an output goroutine for each input channel in cs.  output
+	// copies values from c to out until c is closed, then calls wg.Done.
+	output := func(c <-chan string) {
+		for n := range c {
+			out <- n
+		}
+		wg.Done()
+	}
+	wg.Add(len(cs))
+	for _, c := range cs {
+		go output(c)
+	}
+
+	// Start a goroutine to close out once all the output goroutines are
+	// done.  This must start after the wg.Add call.
+	go func() {
+		wg.Wait()
+		close(out)
+	}()
+	return out
+}
+
 func main() {
 	content, err := os.ReadFile("/workspaces/go-consequences/data/testgrids.json")
 	if err != nil {
@@ -40,10 +94,22 @@ func main() {
 		log.Fatal("Error during Unmarshal():", err)
 	}
 
-	for _, file := range file_list {
+	c := get_files(file_list)
 
-		compute_FathomMultiFrequency(file, "2020", "FLUVIAL-DEFENDED_KNOWN")
+	ts := time.Now()
+
+	c1 := process_file(c)
+	c2 := process_file(c)
+	c3 := process_file(c)
+	c4 := process_file(c)
+	c5 := process_file(c)
+
+	for i := range merge(c1, c2, c3, c4, c5) {
+		fmt.Println(i)
 	}
+
+	te := time.Since(ts)
+	fmt.Printf("All files completed in %s\n", te)
 }
 
 func compute_FathomMultiFrequency(filename string, year string, scenario string) {
@@ -55,7 +121,12 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 	dataset := filename[:len(filename)-4]
 
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi(shape)", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// nsp := structureprovider.InitNSISP()
 
 	//initialize a set of frequencies
 	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
@@ -77,64 +148,64 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 
 	//create a result writer based on the name of the depth grid.
 	//write local
-	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_nsi.parquet", year, scenario, dataset)
-	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "Parquet")
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_summary.csv", year, scenario, dataset)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path)
 	defer w.Close()
 	//compute consequences.
 	compute.StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
 
 }
 
-func main_old() {
-	start := time.Now()
-	fp := os.Args[1]
-	b, err := os.ReadFile(fp)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var config compute.Config
-	json.Unmarshal(b, &config)
-	computable, err := config.CreateComputable()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer computable.ResultsWriter.Close()
-	defer computable.HazardProvider.Close()
-	err = computable.Compute()
-	if err != nil {
-		log.Fatal(err)
-	}
-	elapsed := time.Since(start)
-	fmt.Println("Execution time:", elapsed)
-}
+// func main_old() {
+// 	start := time.Now()
+// 	fp := os.Args[1]
+// 	b, err := os.ReadFile(fp)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	var config compute.Config
+// 	json.Unmarshal(b, &config)
+// 	computable, err := config.CreateComputable()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	defer computable.ResultsWriter.Close()
+// 	defer computable.HazardProvider.Close()
+// 	err = computable.Compute()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
+// 	elapsed := time.Since(start)
+// 	fmt.Println("Execution time:", elapsed)
+// }
 
-func main2() {
-	//initialize the NSI API structure provider
-	// nsp := structureprovider.InitNSISP()
-	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg", "nsi", "GPKG")
-	nsp.SetDeterministic(true)
-	now := time.Now()
-	fmt.Println(now)
-	//nsp.SetDeterministic(true)
-	//identify the depth grid to apply to the structures.
-	root := "/workspaces/go-consequences/data/burlington-davenport-100yr"
-	filepath := root + ".tif"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
-	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-	//create a result writer based on the name of the depth grid.
-	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
-	defer w.Close()
-	//initialize a hazard provider based on the depth grid.
-	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
-		if valueIn.Depth == 0 {
-			return hazard, hazardproviders.NoHazardFoundError{}
-		}
-		process := hazardproviders.DepthHazardFunction()
-		return process(valueIn, hazard)
-	})
-	//compute consequences.
-	fmt.Println("running compute.StreamAbstract")
-	compute.StreamAbstract(dfr, nsp, w)
-	// compute.StreamAbstractMultiVariate(dfr, nsp, w)
-	fmt.Println(time.Since(now))
-}
+// func main2() {
+// 	//initialize the NSI API structure provider
+// 	// nsp := structureprovider.InitNSISP()
+// 	nsp, _ := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/burlington-davenport-nsi.gpkg", "nsi", "GPKG")
+// 	nsp.SetDeterministic(true)
+// 	now := time.Now()
+// 	fmt.Println(now)
+// 	//nsp.SetDeterministic(true)
+// 	//identify the depth grid to apply to the structures.
+// 	root := "/workspaces/go-consequences/data/burlington-davenport-100yr"
+// 	filepath := root + ".tif"
+// 	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
+// 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+// 	//create a result writer based on the name of the depth grid.
+// 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+// 	defer w.Close()
+// 	//initialize a hazard provider based on the depth grid.
+// 	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+// 		if valueIn.Depth == 0 {
+// 			return hazard, hazardproviders.NoHazardFoundError{}
+// 		}
+// 		process := hazardproviders.DepthHazardFunction()
+// 		return process(valueIn, hazard)
+// 	})
+// 	//compute consequences.
+// 	fmt.Println("running compute.StreamAbstract")
+// 	compute.StreamAbstract(dfr, nsp, w)
+// 	// compute.StreamAbstractMultiVariate(dfr, nsp, w)
+// 	fmt.Println(time.Since(now))
+// }

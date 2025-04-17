@@ -258,8 +258,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	// header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_mean"}
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0, 0, 0, 0}
+	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd", "fd_height"}
+	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0, 0, 0, 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	sval := s.StructVal
@@ -277,24 +277,25 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 	// if mvsderr != nil {
 	// 	return ret, mvsderr
 	// }
-	ghgDamFun, ghgerr := s.OccType.GetComponentDamageFunctionForHazard("greenhouse_gas", e)
-	if ghgerr != nil {
-		fmt.Println("Could not get base GHG function")
-		return ret, ghgerr
-	}
+
+	// ghgDamFun, ghgerr := s.OccType.GetComponentDamageFunctionForHazard("greenhouse_gas", e)
+	// if ghgerr != nil {
+	// 	fmt.Println("Could not get base GHG function")
+	// 	return ret, ghgerr
+	// }
 
 	mvDamFun, mvderr := s.OccTypeMultiVariate.GetComponentDamageFunctionForHazardMultiVariate("mv_structure")
 	if mvderr != nil {
-		fmt.Println("Could not get multi-variate GHG function for ", s.OccTypeMultiVariate.Name)
+		fmt.Println("Could not get multi-variate DMG function for ", s.OccTypeMultiVariate.Name)
 		fmt.Println(mvDamFun)
-		return ret, ghgerr
+		return ret, mvderr
 	}
 
 	ghgDamFun2, ghgerr2 := s.OccTypeMultiVariate.GetComponentDamageFunctionForHazardMultiVariate("greenhouse_gas2")
 	if ghgerr2 != nil {
 		fmt.Println("Could not get multi-variate GHG function for ", s.OccTypeMultiVariate.Name)
 		fmt.Println(ghgDamFun2)
-		return ret, ghgerr
+		return ret, ghgerr2
 	}
 
 	dv_dmg_mean := mvDamFun.DamageVectorMean
@@ -344,30 +345,20 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
 			// depthAboveFFE = e.Depth() - s.FoundHt
-			depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt                         // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
-			sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0 //assumes what type the damage array is in
-			cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0
-			// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
+			depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
 
-			dmg_mean = (dv_dmg_mean_depth * depthAboveFFE) + (dv_dmg_mean_sqft * s.Sqft) + (dv_dmg_mean_depth_sqft * depthAboveFFE * s.Sqft)
-			dmg_sd = (dv_dmg_sd_depth * depthAboveFFE) + (dv_dmg_sd_sqft * s.Sqft) + (dv_dmg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+			if e.Depth() > 0.0 {
+				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0 //assumes what type the damage array is in
+				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0
+				// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
 
-			ghg_mean = (dv_ghg_mean_depth * depthAboveFFE) + (dv_ghg_mean_sqft * s.Sqft) + (dv_ghg_mean_depth_sqft * depthAboveFFE * s.Sqft)
-			ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+				if depthAboveFFE > 0.0 {
+					dmg_mean = (dv_dmg_mean_depth * depthAboveFFE) + (dv_dmg_mean_sqft * s.Sqft) + (dv_dmg_mean_depth_sqft * depthAboveFFE * s.Sqft)
+					dmg_sd = (dv_dmg_sd_depth * depthAboveFFE) + (dv_dmg_sd_sqft * s.Sqft) + (dv_dmg_sd_depth_sqft * depthAboveFFE * s.Sqft)
 
-			// ghgEmissions = 1
-			// if e.Has(mvsDamFun.DamageDriver) && e.Has(ghgDamFun.DamageDriver) {
-			if e.Has(ghgDamFun.DamageDriver) {
-				// The usual approach won't work unless I defined a unique occtype for every combination of
-				//    n_floor, sqft, n_bed, n_bath, n_car, and compiled a damage function for each
-
-				// mvsDamage = mvsDamFun.DamageFunction.SampleValue(depthAboveFFE) //what does SampleValue() do exactly? Where is it?
-				// TODO: write alternative function that gets regression parameters and calculates results based on structure factors
-				// CalcValue(depthAboveFFE, s.sqft, s.bedrooms, s.total_bath, s.n_car)
-				//TODO: will have to include sqft, bedrooms, total_bath in
-				// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE + 2) //TODO: remove additional depth after testing
-
-				// this should report kg CO2eq/sval
+					ghg_mean = (dv_ghg_mean_depth * depthAboveFFE) + (dv_ghg_mean_sqft * s.Sqft) + (dv_ghg_mean_depth_sqft * depthAboveFFE * s.Sqft)
+					ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+				}
 			}
 
 		case hazards.Erosion:
@@ -397,6 +388,7 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ret.Result[17] = dmg_sd
 		ret.Result[18] = ghg_mean
 		ret.Result[19] = ghg_sd
+		ret.Result[20] = s.FoundHt
 
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
@@ -420,6 +412,7 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ret.Result[17] = 0.0
 		ret.Result[18] = 0.0
 		ret.Result[19] = 0.0
+		ret.Result[20] = s.FoundHt
 	} else {
 		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}

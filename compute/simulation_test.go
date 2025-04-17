@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -135,14 +136,17 @@ func Test_Config(t *testing.T) {
 }
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	// nsp := structureprovider.InitNSISP()
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
 	now := time.Now()
 	fmt.Println(now)
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	root := "/workspaces/go-consequences/data/burlington-davenport-100yr-clipped"
-	filepath := root + ".tif"
-	w, _ := resultswriters.InitSpatialResultsWriter(root+"_consequencesGHG.gpkg", "results", "GPKG")
+	filepath := "/workspaces/go-consequences/data/fathom/2020/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in50-FLUVIAL-UNDEFENDED-DEPTH-2020-PERCENTILE50-v3.1/n32w092.tif"
+	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/results/test/Test_StreamAbstract2_consequencesGHG.gpkg", "results", "GPKG")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
@@ -161,17 +165,28 @@ func Test_StreamAbstract(t *testing.T) {
 }
 func Test_StreamAbstractMultiVariate(t *testing.T) {
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	// nsp := structureprovider.InitNSISP()
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
 	now := time.Now()
 	fmt.Println(now)
 
-	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/1in100-fluvial-undefended-2020/n32w091.tif"
-	result_path := "/workspaces/go-consequences/data/results/2020/1in100-fluvial-undefended-2020/n32w091_test.parquet"
+	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in50-FLUVIAL-UNDEFENDED-DEPTH-2020-PERCENTILE50-v3.1/n32w092.tif"
+	result_path := "/workspaces/go-consequences/data/results/test/n32w092_testcsv.csv"
 
-	w, _ := resultswriters.InitSpatialResultsWriter(result_path, "results", "Parquet")
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path)
+	// w, _ := resultswriters.InitSpatialResultsWriter(result_path, "results", "Parquet")
 	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
 	defer w.Close()
-
+	// dfr, _ := hazardproviders.Init_CustomFunction(depth_grid_path, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+	// 	if valueIn.Depth == 0 {
+	// 		return hazard, hazardproviders.NoHazardFoundError{}
+	// 	}
+	// 	process := hazardproviders.DepthHazardFunction()
+	// 	return process(valueIn, hazard)
+	// })
 	hp, err := hazardproviders.Init(depth_grid_path)
 	if err != nil {
 		t.Fail()
@@ -182,15 +197,18 @@ func Test_StreamAbstractMultiVariate(t *testing.T) {
 func Test_StreamAbstract_MultiVariateMultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
 	dataset := "n32w092"
-	nsp := structureprovider.InitNSISP()
+	// nsp := structureprovider.InitNSISP()
+
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//initialize a set of frequencies
 	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
 	frequencies := []float64{.2, .1, .05, .02, .01, .005, .002, .001}
 
 	//specify a working directory for data
-	//root := fmt.Sprintf("/vsis3/mmc-storage-6/nsi/Kansas_Silver_Jackets/kansas_ble/%v/", dataset)
-	// root := fmt.Sprintf("/workspaces/Go_Consequences/data/kc_silverjackets/%v/", dataset)
 	root := "/workspaces/go-consequences/data/fathom/2020/"
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
@@ -207,8 +225,10 @@ func Test_StreamAbstract_MultiVariateMultiFrequency(t *testing.T) {
 
 	//create a result writer based on the name of the depth grid.
 	//write local
-	path := fmt.Sprintf("/workspaces/go-consequences/data/results/2020/FLUVIAL-DEFENDED_KNOWN/%v_consequences_nsi.parquet", dataset)
-	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "Parquet")
+	// path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.csv", dataset)
+	// w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path)
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.parquet", dataset)
+	w, _ := resultswriters.InitSpatialResultsWriter(path, "results", "Parquet")
 	defer w.Close()
 	//compute consequences.
 	StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
@@ -223,7 +243,12 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 	dataset := filename[:len(filename)-4]
 
 	//initialize the NSI API structure provider
-	nsp := structureprovider.InitNSISP()
+	// nsp := structureprovider.InitNSISP()
+
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//initialize a set of frequencies
 	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
@@ -245,8 +270,11 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 
 	//create a result writer based on the name of the depth grid.
 	//write local
-	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_nsi.parquet", year, scenario, dataset)
-	w, _ := resultswriters.InitSpatialResultsWriter(path, "nsi_result", "Parquet")
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_summary.csv", year, scenario, dataset)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path)
+	// path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_summary.parquet", year, scenario, dataset)
+	// w, _ := resultswriters.InitSpatialResultsWriter(path, "results", "Parquet")
+
 	defer w.Close()
 	//compute consequences.
 	StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
@@ -270,15 +298,52 @@ func Test_ComputeFathomGrid(t *testing.T) {
 	}
 }
 
+func Test_ParallelComputeFathomGrid(t *testing.T) {
+	content, err := os.ReadFile("/workspaces/go-consequences/data/testgrids.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var file_list []string
+	err = json.Unmarshal(content, &file_list)
+	if err != nil {
+		log.Fatal("Error during Unmarshal():", err)
+	}
+
+	i := 0
+	max := 10
+	for i < len(file_list) {
+		var limiter sync.WaitGroup
+		for j := 0; j < max; j++ {
+			if j == 0 {
+				if i+max > len(file_list) {
+					limiter.Add(len(file_list) - i - 1)
+				} else {
+					limiter.Add(max)
+				}
+			}
+			if i < (len(file_list)) {
+				go func(file string) {
+					defer limiter.Done()
+					fmt.Printf("processing %s\n", file)
+					compute_FathomMultiFrequency(file, "2020", "FLUVIAL-DEFENDED_KNOWN")
+				}(file_list[i])
+				i++
+			}
+		}
+		limiter.Wait()
+	}
+}
+
 func Test_FathomSummary(t *testing.T) {
 	nsp := structureprovider.InitNSISP()
 	now := time.Now()
 	fmt.Println(now)
 
 	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/1in100-fluvial-undefended-2020/n32w092.tif"
-	result_path := "/workspaces/go-consequences/data/results/test/1in100-fluvial-undefended-2020_n32w092_test.csv"
+	result_path := "/workspaces/go-consequences/data/results/test/1in100-fluvial-undefended-2020_n32w092_mvtest.csv"
 
-	w, _ := resultswriters.InitSummaryResultsWriterFromFile(result_path)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path)
 	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
 	defer w.Close()
 

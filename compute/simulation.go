@@ -101,7 +101,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		return
 	}
 	//set up output tables for all frequencies.
-	header := []string{"fd_id", "x", "y", "damcat", "occtype", "s EAD", "c EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht", "cb_id"}
+	header := []string{"fd_id", "x", "y", "damcat", "occupancy type", "S_EAD", "C_EAD", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "found_ht", "cb_id"}
 
 	for _, f := range freqs {
 		header = append(header, fmt.Sprintf("%2.6fS", f))
@@ -280,10 +280,6 @@ func StreamAbstractMultiVariate(hp hazardproviders.HazardProvider, sp consequenc
 	})
 }
 
-func StreamAbstract_MultiFreq_Parallel(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
-
-}
-
 func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Printf("Computing %v frequencies\n", len(hps))
 	//ASSUMPTION hazard providers and frequencies are in the same order
@@ -297,7 +293,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		return
 	}
 	//set up output tables for all frequencies.
-	header := []string{"fd_id", "x", "y", "damcat", "occtype", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "found_ht", "cb_id"}
+	header := []string{"fd_id", "x", "y", "damcat", "occupancy type", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "found_ht", "cb_id"}
 
 	for _, f := range freqs {
 		header = append(header, fmt.Sprintf("%2.6fS", f))
@@ -312,6 +308,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 	sp.ByBbox(bbox, func(f consequences.Receptor) {
 		s, sok := f.(structures.StructureStochastic)
 		if !sok {
+			fmt.Println("Error on f.(structures.StructureStochastic)")
 			return
 		}
 		results := []interface{}{s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt.CentralTendency(), s.CBFips}
@@ -328,6 +325,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		gotWet := false
 		for index, hp := range hps {
 			d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			fmt.Printf("Depth = %f", d)
 			hazarddata = append(hazarddata, d)
 			//compute damages based on hazard being able to provide depth
 
