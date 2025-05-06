@@ -16,6 +16,13 @@ import (
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
+func TestJunk(t *testing.T) {
+	fmt.Println("Added this test to run small snippets of code to test understanding and functionality")
+
+	string := "123456789"
+	fmt.Println(string[:5])
+}
+
 func TestComputeEAD(t *testing.T) {
 	d := []float64{1, 2, 3, 4}
 	f := []float64{.75, .5, .25, 0}
@@ -176,7 +183,7 @@ func Test_StreamAbstractMultiVariate(t *testing.T) {
 	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in50-FLUVIAL-UNDEFENDED-DEPTH-2020-PERCENTILE50-v3.1/n32w092.tif"
 	result_path := "/workspaces/go-consequences/data/results/test/n32w092_testcsv.csv"
 
-	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path, "occtype")
 	// w, _ := resultswriters.InitSpatialResultsWriter(result_path, "results", "Parquet")
 	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
 	defer w.Close()
@@ -225,12 +232,13 @@ func Test_StreamAbstract_MultiVariateMultiFrequency(t *testing.T) {
 
 	//create a result writer based on the name of the depth grid.
 	//write local
-	// path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.csv", dataset)
-	// w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path)
-	path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.parquet", dataset)
-	w, _ := resultswriters.InitSpatialResultsWriter(path, "results", "Parquet")
+	path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.csv", dataset)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path, "occtype")
+	// path := fmt.Sprintf("/workspaces/go-consequences/data/results/test/%v_consequences_nsi.parquet", dataset)
+	// w, _ := resultswriters.InitSpatialResultsWriter(path, "results", "Parquet")
 	defer w.Close()
 	//compute consequences.
+	// StreamAbstractMultiFrequency(hazardProviders, frequencies, nsp, w)
 	StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
 }
 
@@ -271,7 +279,7 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 	//create a result writer based on the name of the depth grid.
 	//write local
 	path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_summary.csv", year, scenario, dataset)
-	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(path, "occtype")
 	// path := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/%v_consequences_summary.parquet", year, scenario, dataset)
 	// w, _ := resultswriters.InitSpatialResultsWriter(path, "results", "Parquet")
 
@@ -343,7 +351,7 @@ func Test_FathomSummary(t *testing.T) {
 	depth_grid_path := "/workspaces/go-consequences/data/fathom/2020/1in100-fluvial-undefended-2020/n32w092.tif"
 	result_path := "/workspaces/go-consequences/data/results/test/1in100-fluvial-undefended-2020_n32w092_mvtest.csv"
 
-	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path)
+	w, _ := resultswriters.Init_csvSummaryResultsWriterFromFile(result_path, "occtype")
 	// w := resultswriters.InitJsonResultsWriterFromFile(result_path)
 	defer w.Close()
 

@@ -27,7 +27,7 @@ func initCR_Meters(fp string) (cogReader, error) {
 func initCR(fp string) (cogReader, error) {
 	//read the file path
 	//make sure it is a tif
-	fmt.Println("Connecting to: " + fp)
+	// fmt.Println("Connecting to: " + fp)
 	ds, err := gdal.Open(fp, gdal.Access(gdal.ReadOnly))
 	if err != nil {
 		return cogReader{}, errors.New("Cannot connect to raster at path " + fp + err.Error())

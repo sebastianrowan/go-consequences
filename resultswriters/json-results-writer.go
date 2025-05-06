@@ -24,6 +24,7 @@ func InitJsonResultsWriterFromFile(filepath string) *jsonResultsWriter {
 func InitJsonResultsWriter(w io.Writer) *jsonResultsWriter {
 	return &jsonResultsWriter{filepath: "not applicapble", w: w}
 }
+
 func (srw *jsonResultsWriter) Write(r consequences.Result) {
 	if !srw.headerHasBeenWritten {
 		fmt.Fprintf(srw.w, "{\"consequences\":[")
@@ -33,6 +34,7 @@ func (srw *jsonResultsWriter) Write(r consequences.Result) {
 	s := string(b) + ","
 	fmt.Fprint(srw.w, s)
 }
+
 func (srw *jsonResultsWriter) Close() {
 	fmt.Fprintf(srw.w, "]}")
 	w2, ok := srw.w.(io.WriteCloser)
@@ -40,3 +42,21 @@ func (srw *jsonResultsWriter) Close() {
 		w2.Close()
 	}
 }
+
+// func (srw *jsonResultsWriter) Write(r consequences.Result) {
+// 	if !srw.headerHasBeenWritten {
+// 		srw.r = "{\"consequences\":["
+// 		srw.headerHasBeenWritten = true
+// 	}
+// 	b, _ := r.MarshalJSON()
+// 	s := string(b) + ","
+// 	srw.r = srw.r + s
+// }
+// func (srw *jsonResultsWriter) Close() {
+// 	srw.r = srw.r + "]}"
+// 	fmt.Fprintf(srw.w, srw.r)
+// 	w2, ok := srw.w.(io.WriteCloser)
+// 	if ok {
+// 		w2.Close()
+// 	}
+// }
