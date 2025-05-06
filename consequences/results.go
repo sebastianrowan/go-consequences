@@ -6,24 +6,28 @@ import (
 	"strings"
 )
 
-//Result is a container to store a list of headers and a list of results
+// Result is a container to store a list of headers and a list of results
 type Result struct {
 	Headers []string      `json:"headers"`
 	Result  []interface{} `json:"result"`
 }
 
-//Results stores a consequence struct and a boolean flagging the result as a table or not
+type MultiFrequencyResultSet struct {
+	Freqs map[float64]Result
+}
+
+// Results stores a consequence struct and a boolean flagging the result as a table or not
 type Results struct {
 	IsTable bool
 	Result  `json:"results"`
 }
 
-//ResultAddable gives me the ability to convert the results slice of interface into a table of slice of interface and store many results...
+// ResultAddable gives me the ability to convert the results slice of interface into a table of slice of interface and store many results...
 type ResultAddable interface {
 	AddResult(c Result) //is this too confusing? it works, but is it confusing?
 }
 
-//AddResult fulfils the ConsequenceAddable interface on the Consequences struct
+// AddResult fulfils the ConsequenceAddable interface on the Consequences struct
 func (c *Results) AddResult(cr Result) {
 	c.IsTable = true
 	//todo check headers for equivalency...
@@ -39,7 +43,7 @@ func (c Result) Fetch(parameter string) (interface{}, error) {
 	return nil, errors.New("Parameter " + parameter + " not found")
 }
 
-//MarshalJSON a better printed version of results - this is my preferred way to print, but it is more complex
+// MarshalJSON a better printed version of results - this is my preferred way to print, but it is more complex
 func (c Results) MarshalJSON() ([]byte, error) {
 	s := "{\"consequences\":["
 	for _, result := range c.Result.Result {

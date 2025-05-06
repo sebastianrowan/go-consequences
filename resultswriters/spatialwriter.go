@@ -9,6 +9,7 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/hazards"
 	"github.com/dewberry/gdal"
+	// "github.com/lukeroth/gdal"
 )
 
 type spatialResultsWriter struct {
@@ -93,13 +94,13 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	//if header has been built, add the feature, and the attributes.
 
 	feature := layerDef.Create()
-	//defer feature.Destroy()
+	defer feature.Destroy()
 	feature.SetFieldInteger(0, srw.index)
 	//create a point geometry - not sure the best way to do that.
 	x := 0.0
 	y := 0.0
 	g := gdal.Create(gdal.GeometryType(gdal.GT_Point))
-	defer g.Destroy()
+	// defer g.Destroy()
 	for i, val := range r.Headers {
 		if val == "x" {
 			x = result[i].(float64)
@@ -182,7 +183,8 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	}
 
 	srw.index++ //incriment.
-	//feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
+
+	// feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
 }
 func (srw *spatialResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
@@ -190,6 +192,8 @@ func (srw *spatialResultsWriter) Close() {
 	if err2 != nil {
 		fmt.Println(err2)
 	}
-	fmt.Printf("Closing, wrote %v features\n", srw.index)
+	// fmt.Printf("Closing, wrote %v features\n", srw.index)
 	srw.ds.Destroy()
+	fmt.Printf("Closed, wrote %v features\n", srw.index)
+
 }
