@@ -36,9 +36,10 @@ func initCR(fp string) (cogReader, error) {
 	igt := ds.InvGeoTransform()
 	v, valid := rb.NoDataValue()
 	cr := cogReader{
-		FilePath:         fp,
-		ds:               &ds,
-		nodata:           -9999,
+		FilePath: fp,
+		ds:       &ds,
+		// nodata:           -9999,
+		nodata:           -32768, // this is the No Data value for the fathom data // this could be a parameter passed to the init function
 		verticalIsMeters: false,
 		rb:               rb,
 		igt:              igt,
