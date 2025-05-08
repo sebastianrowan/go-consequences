@@ -32,7 +32,7 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 		log.Fatal(err)
 	}
 
-	result_dir := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s/testing", year, scenario)
+	result_dir := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s", year, scenario)
 	result_file := fmt.Sprintf("%v_consequences.parquet", dataset)
 	path := fmt.Sprintf("%s/%s", result_dir, result_file)
 
@@ -117,12 +117,7 @@ func merge2(year string, scenario string, cs ...<-chan string) <-chan string {
 	return out
 }
 
-func run_with_channels() {
-	// year := "2050-SSP5_8.5"
-	// scenario := "FLUVIAL-DEFENDED_KNOWN"
-	year := "2020"
-	scenario := "FLUVIAL-UNDEFENDED"
-	filelist := "/workspaces/go-consequences/data/fathom/2020/files2.json"
+func run_with_channels(year string, scenario string, filelist string) {
 
 	content, err := os.ReadFile(filelist)
 	if err != nil {
@@ -139,18 +134,15 @@ func run_with_channels() {
 
 	ts := time.Now()
 
-	// c1 := process_file(c, year, scenario)
-	// c2 := process_file(c, year, scenario)
-	// c3 := process_file(c, year, scenario)
-	// c4 := process_file(c, year, scenario)
-	// c5 := process_file(c, year, scenario)
-	// c6 := process_file(c, year, scenario)
-	// c7 := process_file(c, year, scenario)
-	// c8 := process_file(c, year, scenario)
-	// c9 := process_file(c, year, scenario)
-	// c10 := process_file(c, year, scenario)
-	// c11 := process_file(c, year, scenario)
-	// c12 := process_file(c, year, scenario)
+	// could I make a list of chans and then specify N instead of manually defining each
+	// var chans []chan string
+	// N := 12
+	// for i := 0; i < N; i++ {
+	// 	chans = append(chans, process_file2(c))
+	// }
+	// for i := range merge2(year, scenario, chans) {
+	// 		fmt.Println(i)
+	//}
 	c1 := process_file2(c)
 	c2 := process_file2(c)
 	c3 := process_file2(c)
@@ -173,10 +165,7 @@ func run_with_channels() {
 	fmt.Printf("All files completed in %s\n", te)
 }
 
-func run_with_wgs() {
-	YEAR := "2020"
-	SCENARIO := "FLUVIAL-UNDEFENDED"
-	filelist := "/workspaces/go-consequences/data/fathom/2020/files2.json"
+func run_with_wgs(year string, scenario string, filelist string) {
 
 	content, err := os.ReadFile(filelist)
 	if err != nil {
@@ -205,7 +194,7 @@ func run_with_wgs() {
 			if i < len(file_list) {
 				go func(file string) {
 					defer wg.Done()
-					compute_FathomMultiFrequency(file, YEAR, SCENARIO)
+					compute_FathomMultiFrequency(file, year, scenario)
 				}(file_list[i])
 				i++
 			}
@@ -215,6 +204,10 @@ func run_with_wgs() {
 }
 
 func main() {
-	run_with_channels()
-	// run_with_wgs()
+	YEAR := "2020"
+	SCENARIO := "FLUVIAL-DEFENDED_KNOWN"
+	FILELIST := "/workspaces/go-consequences/data/fathom/2020/files.json"
+
+	run_with_channels(YEAR, SCENARIO, FILELIST)
+	// run_with_wgs(YEAR, SCENARIO, FILELIST)
 }
