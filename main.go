@@ -20,7 +20,7 @@ import (
 func compute_FathomMultiFrequency(filename string, year string, scenario string) {
 
 	// year := "2020"
-	// year :- 2050-SSP5_8.5
+	// year := 2050-SSP5_8.5
 	// scenario := "FLUVIAL-DEFENDED_KNOWN"
 	// fmt.Println("Active Goroutines:", runtime.NumGoroutine())
 
@@ -45,12 +45,12 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
 	frequencies := []float64{.2, .1, .05, .02, .01, .005, .002, .001}
 
-	root := "/workspaces/go-consequences/data/fathom/2020/"
+	root := "/workspaces/go-consequences/data/fathom"
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
 
 	for i, r := range rps {
-		file := fmt.Sprintf("%sFLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-%s-DEPTH-%s-PERCENTILE50-v3.1/%s.tif", root, r, scenario, year, dataset)
+		file := fmt.Sprintf("%s/%s/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-%s-DEPTH-%s-PERCENTILE50-v3.1/%s.tif", root, year, r, scenario, year, dataset)
 		// fmt.Println(file)
 		hp, err := hazardproviders.Init(file)
 		if err != nil {
@@ -203,11 +203,28 @@ func run_with_wgs(year string, scenario string, filelist string) {
 	}
 }
 
-func main() {
-	YEAR := "2020"
-	SCENARIO := "FLUVIAL-DEFENDED_KNOWN"
-	FILELIST := "/workspaces/go-consequences/data/fathom/2020/files.json"
+type fathomConfig struct {
+	Year     string `json:"year"`
+	Scenario string `json:"scenario"`
+	FileList string `json:"filelist"`
+}
 
-	run_with_channels(YEAR, SCENARIO, FILELIST)
+func main() {
+
+	fp := os.Args[1]
+	b, err := os.ReadFile(fp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	var conf fathomConfig
+	json.Unmarshal(b, &conf)
+
+	// YEAR := "2100-SSP2_4.5"
+	// // SSP := "SSP1_2.6"
+	// SCENARIO := "FLUVIAL-UNDEFENDED"
+	// FILELIST := "/workspaces/go-consequences/data/fathom/2020/files.json"
+
+	// run_with_channels(YEAR, SCENARIO, FILELIST)
 	// run_with_wgs(YEAR, SCENARIO, FILELIST)
+	fmt.Println(conf.Year, conf.Scenario, conf.FileList)
 }
