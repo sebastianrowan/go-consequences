@@ -1,0 +1,6 @@
+services:
+  gc:
+    build: .
+    volumes:
+    - .:/workspaces/go-consequences
+    - D:\\fathom:/mnt/dfathom

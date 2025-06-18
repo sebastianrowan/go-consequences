@@ -44,6 +44,35 @@ const (
 // 	// crw.Write(r.Result)
 // }
 
+type hucMatchWriter struct {
+	filepath string
+	w        io.Writer
+	tx       string
+	index    int
+}
+
+func InitHucMatchWriter(filepath string) (*hucMatchWriter, error) {
+	w, err := os.OpenFile(filepath, os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		return &hucMatchWriter{}, err
+	}
+	tx := ""
+	return &hucMatchWriter{filepath: filepath, w: w, tx: tx, index: 0}, nil
+}
+
+func (hw *hucMatchWriter) Write(r consequences.Result) {
+	if hw.index == 0 {
+		hw.tx = "fid,huc08"
+	}
+
+	hw.index++
+}
+
+func (hw *hucMatchWriter) Commit() {
+	fmt.Fprintf(hw.w, "%s", hw.tx)
+	hw.tx = ""
+}
+
 type csvSummaryResultsWriter struct {
 	filepath    string
 	w           io.Writer
@@ -255,5 +284,4 @@ func (csrw *csvSummaryResultsWriter) Write(r consequences.Result) {
 	}
 }
 
-type MultiFrequencyResultSetWriter struct {
-}
+type MultiFrequencyResultSetWriter struct{}

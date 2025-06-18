@@ -17,7 +17,16 @@ import (
 	"github.com/USACE/go-consequences/structureprovider"
 )
 
-func compute_FathomMultiFrequency(filename string, year string, scenario string) {
+type fathomConfig struct {
+	Year      string `json:"year"`
+	SSP       string `json:"ssp"`
+	Scenario  string `json:"scenario"`
+	FileList  string `json:"filelist"`
+	DataDir   string `json:"data_dir"`
+	ResultDir string `json:"results_dir"`
+}
+
+func compute_FathomMultiFrequency(filename string, conf fathomConfig) {
 
 	// year := "2020"
 	// year := 2050-SSP5_8.5
@@ -32,7 +41,18 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 		log.Fatal(err)
 	}
 
-	result_dir := fmt.Sprintf("/workspaces/go-consequences/data/results/%s/%s", year, scenario)
+	year_ssp := conf.Year
+	if conf.SSP != "" {
+		year_ssp = fmt.Sprintf("%s/%s", conf.Year, conf.SSP)
+	}
+
+	result_dir := fmt.Sprintf("%s/%s/%s", conf.ResultDir, year_ssp, conf.Scenario)
+
+	err2 := os.MkdirAll(result_dir, os.ModePerm)
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+
 	result_file := fmt.Sprintf("%v_consequences.parquet", dataset)
 	path := fmt.Sprintf("%s/%s", result_dir, result_file)
 
@@ -45,12 +65,16 @@ func compute_FathomMultiFrequency(filename string, year string, scenario string)
 	rps := []int{5, 10, 20, 50, 100, 200, 500, 1000}
 	frequencies := []float64{.2, .1, .05, .02, .01, .005, .002, .001}
 
-	root := "/workspaces/go-consequences/data/fathom"
+	// root := "/workspaces/go-consequences/data/fathom"
 	//identify the depth grids to represent the frequencies.
 	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
 
+	if conf.SSP != "" {
+		year_ssp = fmt.Sprintf("%s-%s", conf.Year, conf.SSP)
+	}
+
 	for i, r := range rps {
-		file := fmt.Sprintf("%s/%s/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-%s-DEPTH-%s-PERCENTILE50-v3.1/%s.tif", root, year, r, scenario, year, dataset)
+		file := fmt.Sprintf("%s/%s/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in%d-%s-DEPTH-%s-PERCENTILE50-v3.1/%s.tif", conf.DataDir, conf.Year, r, conf.Scenario, year_ssp, dataset)
 		// fmt.Println(file)
 		hp, err := hazardproviders.Init(file)
 		if err != nil {
@@ -89,14 +113,14 @@ func process_file2(in <-chan string) <-chan string {
 	return out
 }
 
-func merge2(year string, scenario string, cs ...<-chan string) <-chan string {
+func merge2(conf fathomConfig, cs ...<-chan string) <-chan string {
 	var wg sync.WaitGroup
 	out := make(chan string)
 
 	output := func(c <-chan string) {
 		for filename := range c {
 			ts := time.Now()
-			compute_FathomMultiFrequency(filename, year, scenario)
+			compute_FathomMultiFrequency(filename, conf)
 			te := time.Since(ts)
 			out_str := fmt.Sprintf("Processed file: %s in %s", filename, te)
 			out <- out_str
@@ -117,9 +141,9 @@ func merge2(year string, scenario string, cs ...<-chan string) <-chan string {
 	return out
 }
 
-func run_with_channels(year string, scenario string, filelist string) {
+func run_with_channels(conf fathomConfig) {
 
-	content, err := os.ReadFile(filelist)
+	content, err := os.ReadFile(conf.FileList)
 	if err != nil {
 		log.Fatal("Error when opening file: ", err)
 	}
@@ -135,14 +159,16 @@ func run_with_channels(year string, scenario string, filelist string) {
 	ts := time.Now()
 
 	// could I make a list of chans and then specify N instead of manually defining each
-	// var chans []chan string
-	// N := 12
+	// N := 15
+	// chans := make([]<-chan string, N)
 	// for i := 0; i < N; i++ {
-	// 	chans = append(chans, process_file2(c))
+	// 	ci := process_file2(c)
+	// 	chans = append(chans, ci)
 	// }
-	// for i := range merge2(year, scenario, chans) {
-	// 		fmt.Println(i)
-	//}
+	// for i := range merge2(conf, chans...) {
+	// 	fmt.Println(i)
+	// }
+
 	c1 := process_file2(c)
 	c2 := process_file2(c)
 	c3 := process_file2(c)
@@ -155,9 +181,12 @@ func run_with_channels(year string, scenario string, filelist string) {
 	c10 := process_file2(c)
 	c11 := process_file2(c)
 	c12 := process_file2(c)
+	c13 := process_file2(c)
+	c14 := process_file2(c)
+	c15 := process_file2(c)
+	c16 := process_file2(c)
 
-	for i := range merge2(year, scenario, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12) {
-		// for i := range merge(c1, c2, c3, c4, c5, c6) {
+	for i := range merge2(conf, c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16) {
 		fmt.Println(i)
 	}
 
@@ -165,9 +194,9 @@ func run_with_channels(year string, scenario string, filelist string) {
 	fmt.Printf("All files completed in %s\n", te)
 }
 
-func run_with_wgs(year string, scenario string, filelist string) {
+func run_with_wgs(conf fathomConfig) {
 
-	content, err := os.ReadFile(filelist)
+	content, err := os.ReadFile(conf.FileList)
 	if err != nil {
 		log.Fatal("Error when opening file: ", err)
 	}
@@ -194,7 +223,7 @@ func run_with_wgs(year string, scenario string, filelist string) {
 			if i < len(file_list) {
 				go func(file string) {
 					defer wg.Done()
-					compute_FathomMultiFrequency(file, year, scenario)
+					compute_FathomMultiFrequency(file, conf)
 				}(file_list[i])
 				i++
 			}
@@ -203,14 +232,9 @@ func run_with_wgs(year string, scenario string, filelist string) {
 	}
 }
 
-type fathomConfig struct {
-	Year     string `json:"year"`
-	Scenario string `json:"scenario"`
-	FileList string `json:"filelist"`
-}
-
 func main() {
 
+	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
 	fp := os.Args[1]
 	b, err := os.ReadFile(fp)
 	if err != nil {
@@ -219,12 +243,5 @@ func main() {
 	var conf fathomConfig
 	json.Unmarshal(b, &conf)
 
-	// YEAR := "2100-SSP2_4.5"
-	// // SSP := "SSP1_2.6"
-	// SCENARIO := "FLUVIAL-UNDEFENDED"
-	// FILELIST := "/workspaces/go-consequences/data/fathom/2020/files.json"
-
-	// run_with_channels(YEAR, SCENARIO, FILELIST)
-	// run_with_wgs(YEAR, SCENARIO, FILELIST)
-	fmt.Println(conf.Year, conf.Scenario, conf.FileList)
+	run_with_channels(conf)
 }

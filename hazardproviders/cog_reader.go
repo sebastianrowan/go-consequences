@@ -14,7 +14,7 @@ type cogReader struct {
 	nodata           float64
 	verticalIsMeters bool //default false
 	rb               gdal.RasterBand
-	igt              [6]float64
+	igt              [6]float64 // InverseGeoTransform
 }
 
 func initCR_Meters(fp string) (cogReader, error) {

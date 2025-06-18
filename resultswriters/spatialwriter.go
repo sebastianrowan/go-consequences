@@ -174,7 +174,7 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if srw.index%200000 == 0 { // increased from 100000 this is the number of records to accumulate before write to disk
+	if srw.index%300000 == 0 { // increased from 100000 this is the number of records to accumulate before write to disk
 		err2 := srw.Layer.CommitTransaction()
 		if err2 != nil {
 			fmt.Println(err2)
@@ -183,8 +183,6 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	}
 
 	srw.index++ //incriment.
-
-	// feature.Destroy() //testing an explicit call.//causes seg fault error, probably not calling causes a memory leak... oy vey.
 }
 func (srw *spatialResultsWriter) Close() {
 	//not sure what this should do - Destroy should close resource connections.
