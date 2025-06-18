@@ -8,6 +8,21 @@ import (
 	"time"
 )
 
+// The existing HazardEvent interface was clearly designed for flood hazards and contains
+// multiple parameters that are essentially just different ways to describe specific hazard metrics
+// the result is a "generic" hazard interface that just has many unused fields for different hazard types.
+// as we expand the hazard types to include seismic and wind, it seems silly to force
+// these hazards to implement so many flood-specific parameters.
+//
+// I haven't looked at the existing code in detail, so this may not be an improvement or worth the effort,
+// but I am making note of this idea now so that I can come back to it later if needed.
+//
+
+type GenericHazard interface {
+	Magnitude() float64
+	Duration() float64
+}
+
 // HazardEvent is an interface I am trying to make to describe all Hazard Events
 type HazardEvent interface {
 	//parameters?
