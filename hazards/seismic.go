@@ -1,5 +1,10 @@
 package hazards
 
+import (
+	"fmt"
+	"time"
+)
+
 // Notes from Hazus Earthquake Model Technical Manual:
 // https://www.fema.gov/sites/default/files/2020-10/fema_hazus_earthquake_technical_manual_4-2.pdf
 // https://www.fema.gov/sites/default/files/documents/fema_hazus-earthquake-model-technical-manual-6-1.pdf
@@ -33,7 +38,105 @@ package hazards
 
 // Section 5.5.
 type SeismicEvent struct {
-	spectral_displacement       float64
-	spectral_acceleration       float64
-	eq_peak_ground_acceleration float64
+	peakGroundAcceleration     float64 // peak ground motion (acceleration, as percent of g)
+	peakGroundVelocity         float64 // peak ground motion (velocity in cm/s)
+	peakSpectralAcceleration03 float64 // spectral acceleration at 0.3 s period, 5% damping (percent of g)
+	peakSpectralAcceleration10 float64 // spectral acceleration at 1.0 s period, 5% damping (percent of g)
+	peakSpectralAcceleration30 float64 // spectral acceleration at 3.0 s period, 5% damping (percent of g)
+	intensity                  float64 // estimated instrumental intensity
+}
+
+func (h SeismicEvent) Depth() float64 {
+	return -901.0
+}
+func (h SeismicEvent) Velocity() float64 {
+	return -901.0
+}
+func (h SeismicEvent) ArrivalTime() time.Time {
+	return time.Time{}
+}
+func (h SeismicEvent) Erosion() float64 {
+	return -901.0
+}
+func (h SeismicEvent) Duration() float64 {
+	return -901.0
+}
+func (h SeismicEvent) WaveHeight() float64 {
+	return -901.0
+}
+func (h SeismicEvent) Salinity() bool {
+	return false
+}
+func (h SeismicEvent) Qualitative() string {
+	return ""
+}
+func (h SeismicEvent) DV() float64 {
+	return -901.0
+}
+
+// Parameters implements the HazardEvent interface
+func (h SeismicEvent) Parameters() Parameter {
+	dp := Default
+	dp = SetHasDepth(dp)
+	return dp
+}
+
+// Has implements the HazardEvent Interface
+func (h SeismicEvent) Has(p Parameter) bool {
+	dp := h.Parameters()
+	return dp&p != 0
+}
+
+func (s SeismicEvent) MarshalJSON() ([]byte, error) {
+	j := fmt.Sprintf("{\"seismicevent\":{\"pga\":%f, \"pgv\":%f}", s.PeakGroundAcceleration(), s.PeakGroundVelocity())
+	// TODO: when functions are implemented, add peak spectral accelerations and intensity to json string
+	return []byte(j), nil
+}
+
+func (s SeismicEvent) PeakGroundAcceleration() float64 {
+	return s.peakGroundAcceleration
+}
+
+func (s *SeismicEvent) SetPeakGroundAcceleration(pga float64) {
+	s.peakGroundAcceleration = pga
+}
+
+func (s SeismicEvent) PeakGroundVelocity() float64 {
+	return s.peakGroundVelocity
+}
+
+func (s *SeismicEvent) SetPeakGroundVelocity(pgv float64) {
+	s.peakGroundVelocity = pgv
+}
+
+func (s SeismicEvent) PeakSpectralAcceleration03() float64 {
+	return s.peakSpectralAcceleration03
+}
+
+func (s *SeismicEvent) SetSpectralAcceleration03(psa03 float64) {
+	s.peakSpectralAcceleration03 = psa03
+}
+
+func (s SeismicEvent) PeakSpectralAcceleration10() float64 {
+	return s.peakSpectralAcceleration10
+}
+
+func (s *SeismicEvent) SetSpectralAcceleration10(psa10 float64) {
+	s.peakSpectralAcceleration03 = psa10
+}
+
+func (s SeismicEvent) PeakSpectralAcceleration30() float64 {
+	return s.peakSpectralAcceleration30
+}
+
+func (s *SeismicEvent) SetSpectralAcceleration30(psa30 float64) {
+	s.peakSpectralAcceleration30 = psa30
+}
+
+func (s SeismicEvent) Intensity() float64 {
+	return s.intensity
+}
+
+func (s *SeismicEvent) SetIntensity(i float64) {
+	s.intensity = i
 }

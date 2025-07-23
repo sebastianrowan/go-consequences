@@ -70,7 +70,7 @@ func (d ArrivalandDurationEvent) MarshalJSON() ([]byte, error) {
 	s := fmt.Sprintf("{\"arrivalanddurationevent\":{\"arrivaltime\":%s,\"duration\":%f}}", d.ArrivalTime().Format("Jan _2 15:04"), d.Duration())
 	return []byte(s), nil
 }
-func (h ArrivalandDurationEvent) Depth(param string) float64 {
+func (h ArrivalandDurationEvent) Depth() float64 {
 	return -901.0
 }
 func (h ArrivalandDurationEvent) Velocity() float64 {
