@@ -18,6 +18,10 @@ type BaseStructure struct {
 	DamCat                string
 	CBFips                string
 	Sqft                  float64
+	Bedrooms              float64
+	TotalBath             float64
+	GarageType            float64
+	ParkingSpaces         float64
 	X, Y, GroundElevation float64
 }
 type PopulationSet struct {
