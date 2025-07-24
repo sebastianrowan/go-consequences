@@ -14,13 +14,14 @@ import (
 
 // BaseStructure represents a Structure name xy location and a damage category
 type BaseStructure struct {
-	Name                  string
-	DamCat                string
-	CBFips                string
-	Sqft                  float64
-	Bedrooms              float64
-	TotalBath             float64
-	GarageType            float64
+	Name       string
+	DamCat     string
+	CBFips     string
+	Sqft       float64
+	Bedrooms   float64
+	TotalBath  float64
+	GarageType string // GarageType is probably a string in the API.
+	// Will decide later if this should be a string too, or replaced with an enum
 	ParkingSpaces         float64
 	X, Y, GroundElevation float64
 }

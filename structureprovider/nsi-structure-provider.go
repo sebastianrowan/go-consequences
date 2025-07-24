@@ -25,6 +25,10 @@ type NsiProperties struct {
 	FoundType        string  `json:"found_type"`
 	DamCat           string  `json:"st_damcat"`
 	Sqft             float64 `json:"sqft"`
+	Bedrooms         float64 `json:"bedrooms"`
+	TotalBath        float64 `json:"total_bath"`
+	GarageType       string  `json:"p_garage"`
+	ParkingSpaces    float64 `json:"parkingsp"`
 	StructVal        float64 `json:"val_struct"`
 	ContVal          float64 `json:"val_cont"`
 	CB               string  `json:"cbfips"`
