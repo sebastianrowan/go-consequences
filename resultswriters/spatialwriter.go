@@ -174,7 +174,7 @@ func (srw *spatialResultsWriter) Write(r consequences.Result) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	if srw.index%300000 == 0 { // increased from 100000 this is the number of records to accumulate before write to disk
+	if srw.index%200000 == 0 { // increased from 100000 this is the number of records to accumulate before write to disk
 		err2 := srw.Layer.CommitTransaction()
 		if err2 != nil {
 			fmt.Println(err2)
