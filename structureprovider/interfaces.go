@@ -25,7 +25,7 @@ func StructureSchema() []string {
 }
 
 func OptionalSchema() []string {
-	s := make([]string, 8)
+	s := make([]string, 12)
 	s[0] = "num_story"
 	s[1] = "pop2amu65"
 	s[2] = "pop2amo65"
@@ -34,6 +34,10 @@ func OptionalSchema() []string {
 	s[5] = "ground_elv"
 	s[6] = "bldgtype"
 	s[7] = "firmzone"
+	s[8] = "bedrooms"
+	s[9] = "total_bath"
+	s[10] = "p_garage"
+	s[11] = "parkingsp"
 	return s
 }
 
@@ -93,9 +97,10 @@ func featuretoStructure(
 		}
 	}
 	sqft := 0.0
-	if idxs[10] > 0 {
+	if idxs[10] > 0 { // I don't remember why this check is needed
 		sqft = f.FieldAsFloat64(idxs[10])
 	}
+
 	s.OccType = occtype
 	s.OccTypeMultiVariate = occtypeMV
 	s.Sqft = sqft
@@ -136,6 +141,18 @@ func featuretoStructure(
 	}
 	if oidxs[7] != -1 {
 		s.FirmZone = f.FieldAsString(oidxs[7])
+	}
+	if oidxs[8] != -1 {
+		s.Bedrooms = int32(f.FieldAsInteger(oidxs[8]))
+	}
+	if oidxs[9] != -1 {
+		s.TotalBath = int32(f.FieldAsInteger(oidxs[9]))
+	}
+	if oidxs[10] != -1 {
+		s.GarageType = f.FieldAsString(oidxs[10])
+	}
+	if oidxs[11] != -1 {
+		s.ParkingSpaces = int32(f.FieldAsInteger(oidxs[11]))
 	}
 	return s, nil
 }
