@@ -18,11 +18,11 @@ type BaseStructure struct {
 	DamCat     string
 	CBFips     string
 	Sqft       float64
-	Bedrooms   float64
-	TotalBath  float64
+	Bedrooms   int32
+	TotalBath  int32
 	GarageType string // GarageType is probably a string in the API.
 	// Will decide later if this should be a string too, or replaced with an enum
-	ParkingSpaces         float64
+	ParkingSpaces         int32
 	X, Y, GroundElevation float64
 }
 type PopulationSet struct {
