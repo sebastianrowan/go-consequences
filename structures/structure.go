@@ -261,6 +261,28 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 	return ret, err
 }
 
+func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterministic, depth_ffe float64) (float64, float64) {
+	mean := df.DamageVectorMean.Intercept +
+		(df.DamageVectorMean.Depth * depth_ffe) +
+		(df.DamageVectorMean.Sqft * s.Sqft) +
+		(df.DamageVectorMean.N_bed * float64(s.Bedrooms)) +
+		(df.DamageVectorMean.N_bath * float64(s.TotalBath)) +
+		(df.DamageVectorMean.Depth_sqft * depth_ffe * s.Sqft) +
+		(df.DamageVectorMean.Depth_n_bed * depth_ffe * float64(s.Bedrooms)) +
+		(df.DamageVectorMean.Depth_n_bath * depth_ffe * float64(s.TotalBath))
+
+	sd := df.DamageVectorSD.Intercept +
+		(df.DamageVectorSD.Depth * depth_ffe) +
+		(df.DamageVectorSD.Sqft * s.Sqft) +
+		(df.DamageVectorSD.N_bed * float64(s.Bedrooms)) +
+		(df.DamageVectorSD.N_bath * float64(s.TotalBath)) +
+		(df.DamageVectorSD.Depth_sqft * depth_ffe * s.Sqft) +
+		(df.DamageVectorSD.Depth_n_bed * depth_ffe * float64(s.Bedrooms)) +
+		(df.DamageVectorSD.Depth_n_bath * depth_ffe * float64(s.TotalBath))
+
+	return mean, sd
+}
+
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	// header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_mean"}
@@ -311,27 +333,27 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		return ret, ghgerr2
 	}
 
-	dv_dmg_mean := mvDamFun.DamageVectorMean
-	dv_dmg_sd := mvDamFun.DamageVectorSD
+	// dv_dmg_mean := mvDamFun.DamageVectorMean
+	// dv_dmg_sd := mvDamFun.DamageVectorSD
 
-	dv_ghg_mean := ghgDamFun2.DamageVectorMean
-	dv_ghg_sd := ghgDamFun2.DamageVectorSD
+	// dv_ghg_mean := ghgDamFun2.DamageVectorMean
+	// dv_ghg_sd := ghgDamFun2.DamageVectorSD
 
-	dv_dmg_mean_depth := dv_dmg_mean.Depth
-	dv_dmg_mean_sqft := dv_dmg_mean.Sqft
-	dv_dmg_mean_depth_sqft := dv_dmg_mean.Depth_sqft
+	// dv_dmg_mean_depth := dv_dmg_mean.Depth
+	// dv_dmg_mean_sqft := dv_dmg_mean.Sqft
+	// dv_dmg_mean_depth_sqft := dv_dmg_mean.Depth_sqft
 
-	dv_dmg_sd_depth := dv_dmg_sd.Depth
-	dv_dmg_sd_sqft := dv_dmg_sd.Sqft
-	dv_dmg_sd_depth_sqft := dv_dmg_sd.Depth_sqft
+	// dv_dmg_sd_depth := dv_dmg_sd.Depth
+	// dv_dmg_sd_sqft := dv_dmg_sd.Sqft
+	// dv_dmg_sd_depth_sqft := dv_dmg_sd.Depth_sqft
 
-	dv_ghg_mean_depth := dv_ghg_mean.Depth
-	dv_ghg_mean_sqft := dv_ghg_mean.Sqft
-	dv_ghg_mean_depth_sqft := dv_ghg_mean.Depth_sqft
+	// dv_ghg_mean_depth := dv_ghg_mean.Depth
+	// dv_ghg_mean_sqft := dv_ghg_mean.Sqft
+	// dv_ghg_mean_depth_sqft := dv_ghg_mean.Depth_sqft
 
-	dv_ghg_sd_depth := dv_ghg_sd.Depth
-	dv_ghg_sd_sqft := dv_ghg_sd.Sqft
-	dv_ghg_sd_depth_sqft := dv_ghg_sd.Depth_sqft
+	// dv_ghg_sd_depth := dv_ghg_sd.Depth
+	// dv_ghg_sd_sqft := dv_ghg_sd.Sqft
+	// dv_ghg_sd_depth_sqft := dv_ghg_sd.Depth_sqft
 
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
@@ -358,6 +380,7 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
 			// depthAboveFFE = e.Depth() - s.FoundHt
+			// TODO: This should be managed in the config.
 			depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
 
 			if e.Depth() > 0.0 {
@@ -366,11 +389,14 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 				// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
 
 				if depthAboveFFE > 0.0 {
-					dmg_mean = (dv_dmg_mean_depth * depthAboveFFE) + (dv_dmg_mean_sqft * s.Sqft) + (dv_dmg_mean_depth_sqft * depthAboveFFE * s.Sqft)
-					dmg_sd = (dv_dmg_sd_depth * depthAboveFFE) + (dv_dmg_sd_sqft * s.Sqft) + (dv_dmg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+					// dmg_mean = (dv_dmg_mean_depth * depthAboveFFE) + (dv_dmg_mean_sqft * s.Sqft) + (dv_dmg_mean_depth_sqft * depthAboveFFE * s.Sqft)
+					// dmg_sd = (dv_dmg_sd_depth * depthAboveFFE) + (dv_dmg_sd_sqft * s.Sqft) + (dv_dmg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+					dmg_mean, dmg_sd = damageVectorCalculate(mvDamFun, s, depthAboveFFE)
 
-					ghg_mean = (dv_ghg_mean_depth * depthAboveFFE) + (dv_ghg_mean_sqft * s.Sqft) + (dv_ghg_mean_depth_sqft * depthAboveFFE * s.Sqft)
-					ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+					// ghg_mean = (dv_ghg_mean_depth * depthAboveFFE) + (dv_ghg_mean_sqft * s.Sqft) + (dv_ghg_mean_depth_sqft * depthAboveFFE * s.Sqft)
+					// ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
+					ghg_mean, ghg_sd = damageVectorCalculate(ghgDamFun2, s, depthAboveFFE)
+					fmt.Println(dmg_mean, ", ", ghg_mean)
 				}
 			}
 
