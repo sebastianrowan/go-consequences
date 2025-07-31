@@ -396,7 +396,6 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 					// ghg_mean = (dv_ghg_mean_depth * depthAboveFFE) + (dv_ghg_mean_sqft * s.Sqft) + (dv_ghg_mean_depth_sqft * depthAboveFFE * s.Sqft)
 					// ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
 					ghg_mean, ghg_sd = damageVectorCalculate(ghgDamFun2, s, depthAboveFFE)
-					fmt.Println(dmg_mean, ", ", ghg_mean)
 				}
 			}
 
