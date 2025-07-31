@@ -13,6 +13,7 @@ import (
 
 	"github.com/USACE/go-consequences/compute"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
@@ -232,7 +233,7 @@ func run_with_wgs(conf fathomConfig) {
 	}
 }
 
-func main() {
+func main2() {
 
 	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
 	fp := os.Args[1]
@@ -244,4 +245,33 @@ func main() {
 	json.Unmarshal(b, &conf)
 
 	run_with_channels(conf)
+}
+
+func main() {
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	now := time.Now()
+	fmt.Println(now)
+	//nsp.SetDeterministic(true)
+	//identify the depth grid to apply to the structures.
+	filepath := "/workspaces/go-consequences/data/testraster2.tif"
+	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/test3.gpkg", "results", "GPKG")
+	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//create a result writer based on the name of the depth grid.
+	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+	defer w.Close()
+	//initialize a hazard provider based on the depth grid.
+	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		if valueIn.Depth == 0 {
+			return hazard, hazardproviders.NoHazardFoundError{}
+		}
+		process := hazardproviders.DepthHazardFunction()
+		return process(valueIn, hazard)
+	})
+	//compute consequences.
+	compute.StreamAbstract(dfr, nsp, w)
+	fmt.Println(time.Since(now))
 }

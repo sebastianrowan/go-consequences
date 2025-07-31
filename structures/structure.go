@@ -126,7 +126,7 @@ func (s StructureStochastic) SampleStructure(seed int64) StructureDeterministic 
 		FoundHt:             fh,
 		PopulationSet:       PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:          s.NumStories,
-		BaseStructure:       BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		BaseStructure:       BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, Bedrooms: s.Bedrooms, TotalBath: s.TotalBath, GarageType: s.GarageType, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 
 // Compute implements the consequences.Receptor interface on StrucutreStochastic
@@ -168,13 +168,14 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		FoundHt:          s.FoundHt,
 		PopulationSet:    PopulationSet{s.Pop2amo65, s.Pop2pmu65, s.Pop2amo65, s.Pop2amu65},
 		NumStories:       s.NumStories,
-		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
+		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, Bedrooms: s.Bedrooms, TotalBath: s.TotalBath, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
+
 	sval := s.StructVal
 	conval := s.ContVal
 	sDamFun, sderr := s.OccType.GetComponentDamageFunctionForHazard("structure", e)
@@ -263,8 +264,15 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	// header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_mean"}
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd", "fd_height"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0, 0, 0, 0, 0, 0}
+	header := []string{
+		"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage",
+		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe",
+		"dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd", "fd_height"}
+	results := []interface{}{
+		"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0,
+		0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0,
+		0, 0, 0, 0, 0}
+
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
 	sval := s.StructVal
