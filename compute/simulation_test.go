@@ -141,6 +141,7 @@ func Test_Config(t *testing.T) {
 	}
 
 }
+
 func Test_StreamAbstract(t *testing.T) {
 	//initialize the NSI API structure provider
 	// nsp := structureprovider.InitNSISP()
@@ -152,8 +153,8 @@ func Test_StreamAbstract(t *testing.T) {
 	fmt.Println(now)
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	filepath := "/workspaces/go-consequences/data/fathom/2020/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in50-FLUVIAL-UNDEFENDED-DEPTH-2020-PERCENTILE50-v3.1/n32w092.tif"
-	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/results/test/Test_StreamAbstract2_consequencesGHG.gpkg", "results", "GPKG")
+	filepath := "/mnt/dfathom/data/2100/FLOOD_MAP-1_3ARCSEC-NW_OFFSET-1in10-PLUVIAL-DEFENDED-DEPTH-2100-SSP1_2.6-PERCENTILE50-v3.1/n42w071.tif"
+	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/test2.gpkg", "results", "GPKG")
 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
 	//create a result writer based on the name of the depth grid.
 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
