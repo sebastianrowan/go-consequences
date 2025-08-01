@@ -11,6 +11,7 @@ import (
 
 	"github.com/USACE/go-consequences/compute"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
