@@ -1,8 +1,6 @@
 module github.com/USACE/go-consequences
 
-go 1.21.3
-
-toolchain go1.23.4
+go 1.24
 
 require (
 	github.com/HydrologicEngineeringCenter/go-statistics v0.0.0-20221221211532-e53b36ba1a67

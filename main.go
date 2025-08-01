@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"runtime"
 
-	// _ "net/http/pprof"
 	"os"
 	"sync"
 	"time"
@@ -86,8 +84,6 @@ func compute_FathomMultiFrequency(filename string, conf fathomConfig) {
 	//compute consequences.
 	compute.StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
 	w.Close()
-	w = nil
-	runtime.GC()
 }
 
 func get_files(file_list []string) <-chan string {
@@ -232,45 +228,45 @@ func run_with_wgs(conf fathomConfig) {
 	}
 }
 
-func main() {
+// func main() {
 
-	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
-	fp := os.Args[1]
-	b, err := os.ReadFile(fp)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var conf fathomConfig
-	json.Unmarshal(b, &conf)
-
-	run_with_channels(conf)
-}
-
-// func testfunction() {
-// 	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+// 	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
+// 	fp := os.Args[1]
+// 	b, err := os.ReadFile(fp)
 // 	if err != nil {
 // 		log.Fatal(err)
 // 	}
+// 	var conf fathomConfig
+// 	json.Unmarshal(b, &conf)
 
-// 	now := time.Now()
-// 	fmt.Println(now)
-// 	//nsp.SetDeterministic(true)
-// 	//identify the depth grid to apply to the structures.
-// 	filepath := "/workspaces/go-consequences/data/testraster2.tif"
-// 	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/test3.gpkg", "results", "GPKG")
-// 	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-// 	//create a result writer based on the name of the depth grid.
-// 	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
-// 	defer w.Close()
-// 	//initialize a hazard provider based on the depth grid.
-// 	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
-// 		if valueIn.Depth == 0 {
-// 			return hazard, hazardproviders.NoHazardFoundError{}
-// 		}
-// 		process := hazardproviders.DepthHazardFunction()
-// 		return process(valueIn, hazard)
-// 	})
-// 	//compute consequences.
-// 	compute.StreamAbstractMultiVariate(dfr, nsp, w)
-// 	fmt.Println(time.Since(now))
+// 	run_with_channels(conf)
 // }
+
+func main() {
+	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	now := time.Now()
+	fmt.Println(now)
+	//nsp.SetDeterministic(true)
+	//identify the depth grid to apply to the structures.
+	filepath := "/workspaces/go-consequences/data/testraster2.tif"
+	w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/test3.gpkg", "results", "GPKG")
+	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
+	//create a result writer based on the name of the depth grid.
+	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
+	defer w.Close()
+	//initialize a hazard provider based on the depth grid.
+	dfr, _ := hazardproviders.Init_CustomFunction(filepath, func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
+		if valueIn.Depth == 0 {
+			return hazard, hazardproviders.NoHazardFoundError{}
+		}
+		process := hazardproviders.DepthHazardFunction()
+		return process(valueIn, hazard)
+	})
+	//compute consequences.
+	compute.StreamAbstractMultiVariate(dfr, nsp, w)
+	fmt.Println(time.Since(now))
+}
