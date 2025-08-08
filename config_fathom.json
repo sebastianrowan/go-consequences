@@ -1,7 +1,7 @@
 {
     "year": "2100",
     "ssp": "SSP5_8.5",
-    "scenario": "PLUVIAL-DEFENDED",
+    "scenario": "FLUVIAL-UNDEFENDED",
     "filelist": "/workspaces/go-consequences/data/fathom/fathomgrid.json",
     "data_dir": "/mnt/dfathom/data",
     "results_dir": "/workspaces/go-consequences/data/results"
