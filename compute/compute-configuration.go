@@ -27,6 +27,7 @@ type Config struct {
 	ComputeByFips                           bool    `json:"compute_by_fips"`
 	FipsCode                                string  `json:"fips_code"`
 }
+
 type Computeable struct {
 	structureprovider.StructureProvider
 	hazardproviders.HazardProvider

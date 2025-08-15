@@ -1,7 +1,10 @@
 package main
 
+import "C"
+
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"os"
 
@@ -41,32 +44,25 @@ func main() {
 	}
 }
 
-/*
-	var cfg Config
-	if cfg.LambdaContext {
-		log.Print("starting server; Running On AWS LAMBDA")
-		//lambda.Start(HandleRequestArgs)
-	} else {
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			params := r.URL.Query()
-			fp, fpPresent := params["FilePath"]
-			if !fpPresent {
-				http.Error(w, "No FilePath argument", http.StatusNotFound)
-			} else {
-				if len(fp[0]) == 0 {
-					//should have better error checking...
-					http.Error(w, "Invalid FilePath argument", http.StatusNotFound)
-				} else {
-					nsp := structureprovider.InitNSISP()
-					w2 := resultswriters.InitStreamingResultsWriter(w)
-					hp, _ := hazardproviders.Init(fp[0])
-					compute.StreamAbstract(hp, nsp, w2)
-				}
-			}
-		})
-		log.Print("Not on Lambda")
-		log.Print("starting local server")
-		log.Fatal(http.ListenAndServe("localhost:3030", nil))
+//go build -o pyconsequences/pyconsequences.dll -buildmode=c-shared main.go
+//go build -o pyconsequences/pyconsequences.so -buildmode=c-shared main.go
+
+//export RunFromConfigFile
+func RunFromConfigFile(fp *C.char) {
+	//TODO: when users run go-consequences through a compiled dll with python,
+	//	will we run into issues if users pass a relative file path?
+	//	or will the dll run in the same working directory as the python
+	//	code that imported it?
+
+	config_path := C.GoString(fp)
+
+	b, err := os.ReadFile(config_path)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	var conf compute.Config
+	json.Unmarshal(b, &conf)
+
+	fmt.Println(conf)
 }
-*/
