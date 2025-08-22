@@ -4,9 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"runtime"
 
-	// _ "net/http/pprof"
 	"os"
 	"sync"
 	"time"
@@ -15,6 +13,7 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
+	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
@@ -88,8 +87,6 @@ func compute_FathomMultiFrequency(filename string, conf fathomConfig) {
 	//compute consequences.
 	compute.StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
 	w.Close()
-	w = nil
-	runtime.GC()
 }
 
 func get_files(file_list []string) <-chan string {
@@ -234,7 +231,8 @@ func run_with_wgs(conf fathomConfig) {
 	}
 }
 
-func mainjunk() {
+
+func main() {
 
 	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
 	fp := os.Args[1]
@@ -248,9 +246,10 @@ func mainjunk() {
 	run_with_channels(conf)
 }
 
-func main() {
+func junk() {
 
 	fmt.Println("Begin")
+
 	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_2022.gpkg", "nsi", "GPKG")
 	if err != nil {
 		log.Fatal(err)
@@ -260,15 +259,9 @@ func main() {
 	fmt.Println(now)
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
-	// filepath := "/workspaces/go-consequences/data/testraster2.tif"
-	// w, _ := resultswriters.InitSpatialResultsWriter("/workspaces/go-consequences/data/test3.gpkg", "results", "GPKG")
-	//w := consequences.InitSummaryResultsWriterFromFile(root + "_consequences_SUMMARY.json")
-	//create a result writer based on the name of the depth grid.
-	//w, _ := resultswriters.InitGpkResultsWriter(root+"_consequences_nsi.gpkg", "nsi_result")
-	// defer w.Close()
-	//initialize a hazard provider based on the depth grid.
 
-	//compute consequences.
+	filepath := "/workspaces/go-consequences/data/testraster2.tif"
+
 	fmt.Println("Starting BBOX stream...")
 
 	nsp.ByBbox(geography.BBox{Bbox: []float64{-72.0, 45.0, -72.1, 45.1}}, func(f consequences.Receptor) {
