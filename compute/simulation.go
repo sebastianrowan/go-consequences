@@ -298,6 +298,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 	header := []string{"fd_id", "x", "y", "damcat", "occupancy type", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "found_ht", "cb_id"}
 
 	for _, f := range freqs {
+		header = append(header, fmt.Sprintf("%2.6fdepthFFE", f))
 		header = append(header, fmt.Sprintf("%2.6fS", f))
 		header = append(header, fmt.Sprintf("%2.6fC", f))
 		header = append(header, fmt.Sprintf("%2.6fDM", f))
@@ -322,6 +323,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 			results = append(results, sd.Name, sd.X, sd.Y, sd.DamCat, sd.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt, s.CBFips)
 		}
 
+		depths := make([]float64, len(freqs))
 		sEADs := make([]float64, len(freqs))
 		cEADs := make([]float64, len(freqs))
 		mean_dmg_EADs := make([]float64, len(freqs))
@@ -341,6 +343,13 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 				r, err3 := f.ComputeMultiVariate(d)
 				if err3 == nil {
 					gotWet = true
+					dep, err := r.Fetch("depth_ffe")
+					if err != nil {
+						depths[index] = -999.0
+					} else {
+						depths[index] = dep.(float64)
+					}
+
 					sdam, err := r.Fetch("structure damage")
 					if err != nil {
 						//panic?
@@ -394,6 +403,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						sd_ghg_EADs[index] = damage
 					}
 				}
+				results = append(results, depths[index])
 				results = append(results, sEADs[index])
 				results = append(results, cEADs[index])
 				results = append(results, mean_dmg_EADs[index])
@@ -402,6 +412,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 				results = append(results, sd_ghg_EADs[index])
 			} else {
 				//record zeros?
+				results = append(results, -999.0)
 				results = append(results, 0.0)
 				results = append(results, 0.0)
 				results = append(results, 0.0)
