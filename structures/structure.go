@@ -283,6 +283,21 @@ func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterminist
 	return mean, sd
 }
 
+func computeConsequencesMultiVariate_forJamesModel(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
+
+	ed := e.Depth()
+	depthAboveFFE := (ed / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
+	header := []string{"fd_id", "depth_ffe"}
+	results := []interface{}{s.BaseStructure.Name, depthAboveFFE}
+	var ret = consequences.Result{Headers: header, Result: results}
+	var err error = nil
+	if ed <= 0 {
+		err = errors.New("not flooded")
+	}
+
+	return ret, err
+}
+
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	// header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_mean"}

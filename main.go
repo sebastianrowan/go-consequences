@@ -13,7 +13,6 @@ import (
 	"github.com/USACE/go-consequences/consequences"
 	"github.com/USACE/go-consequences/geography"
 	"github.com/USACE/go-consequences/hazardproviders"
-	"github.com/USACE/go-consequences/hazards"
 	"github.com/USACE/go-consequences/resultswriters"
 	"github.com/USACE/go-consequences/structureprovider"
 )
@@ -85,7 +84,8 @@ func compute_FathomMultiFrequency(filename string, conf fathomConfig) {
 	}
 
 	//compute consequences.
-	compute.StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
+	// compute.StreamAbstract_MultiFreq_MultiVar(hazardProviders, frequencies, nsp, w)
+	compute.StreamAbstract_JamesDepths(hazardProviders, frequencies, nsp, w)
 	w.Close()
 }
 
@@ -231,11 +231,11 @@ func run_with_wgs(conf fathomConfig) {
 	}
 }
 
-
 func main() {
 
 	// when running with data from external hard drive, analysis took 5.5 hours vs 1.5 with data on internal solid state drive
-	fp := os.Args[1]
+	// fp := os.Args[1]
+	fp := "config_fathom.json"
 	b, err := os.ReadFile(fp)
 	if err != nil {
 		log.Fatal(err)
@@ -260,7 +260,7 @@ func junk() {
 	//nsp.SetDeterministic(true)
 	//identify the depth grid to apply to the structures.
 
-	filepath := "/workspaces/go-consequences/data/testraster2.tif"
+	// filepath := "/workspaces/go-consequences/data/testraster2.tif"
 
 	fmt.Println("Starting BBOX stream...")
 

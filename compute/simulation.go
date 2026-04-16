@@ -442,3 +442,75 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 	})
 	// w.Close()
 }
+
+func StreamAbstract_JamesDepths(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
+	// fmt.Printf("Computing %v frequencies\n", len(hps))
+	//ASSUMPTION hazard providers and frequencies are in the same order
+	//ASSUMPTION ordered by most frequent to least frequent event
+	//ASSUMPTION! get bounding box from largest frequency.
+
+	largestHp := hps[len(hps)-1]
+	bbox, err := largestHp.HazardBoundary()
+	if err != nil {
+		fmt.Printf("Unable to get the raster bounding box: %s", err)
+		return
+	}
+	//set up output tables for all frequencies.
+	header := []string{"fd_id"}
+
+	for _, f := range freqs {
+		header = append(header, fmt.Sprintf("d_1in%1.0f", 1/f))
+	}
+
+	sp.ByBbox(bbox, func(f consequences.Receptor) {
+
+		var results []interface{}
+
+		s, sok := f.(structures.StructureStochastic)
+		if sok {
+			results = append(results, s.Name)
+		} else {
+			sd, sdok := f.(structures.StructureDeterministic)
+			if !sdok {
+				return
+			}
+			results = append(results, sd.Name)
+		}
+
+		depths := make([]float64, len(freqs))
+
+		hazarddata := make([]hazards.HazardEvent, len(freqs))
+		//ProvideHazard works off of a geography.Location
+		gotWet := false
+		for index, hp := range hps {
+			d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
+			hazarddata = append(hazarddata, d)
+			if err == nil {
+				r, err3 := f.ComputeMultiVariate(d)
+				if err3 == nil {
+					gotWet = true
+					dep, err := r.Fetch("depth_ffe")
+					if err != nil {
+						depths[index] = -999.0
+					} else {
+						depths[index] = dep.(float64)
+					}
+				} else {
+					depths[index] = -999.0
+				}
+				results = append(results, depths[index])
+			} else {
+				//record zeros?
+				results = append(results, -999.0)
+			}
+			//compute damages based on hazard being able to provide depth
+		}
+		var ret = consequences.Result{Headers: header, Result: results}
+		if gotWet {
+			w.Write(ret)
+		}
+
+	})
+	// w.Close()
+
+}
