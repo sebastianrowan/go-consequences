@@ -456,7 +456,7 @@ func computeConsequencesMulti(events []hazards.HazardEvent, s StructureDetermini
 			result.Result[1] = sdamage
 			result.Result[2] = cdamage
 			result.Result[3] = sdampercent
-			result.Result[3] = cdampercent
+			result.Result[4] = cdampercent
 			result.Result[5] = math.Ceil(reconstruction_days)
 			result.Result[6] = completion_date
 			result.Result[7] = svalcurr
@@ -639,7 +639,7 @@ func computeConsequencesMultiHazard(event hazards.MultiHazardEvent, s StructureD
 			result.Result[1] = sdamage
 			result.Result[2] = cdamage
 			result.Result[3] = sdampercent
-			result.Result[3] = cdampercent
+			result.Result[4] = cdampercent
 			result.Result[5] = math.Ceil(reconstruction_days)
 			result.Result[6] = completion_date
 			result.Result[7] = svalcurr
