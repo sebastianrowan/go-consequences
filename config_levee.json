@@ -1,0 +1,7 @@
+{
+    "year": "2026",
+    "ssp": "",
+    "scenarios": "/workspaces/go-consequences/data/levee/scenarios.json",
+    "data_dir": "/mnt/dlevee/data",
+    "results_dir": "/mnt/dlevee/results"
+}

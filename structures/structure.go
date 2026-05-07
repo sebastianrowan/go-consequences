@@ -170,6 +170,7 @@ func (s StructureDeterministic) Clone() StructureDeterministic {
 		NumStories:       s.NumStories,
 		BaseStructure:    BaseStructure{Name: s.Name, CBFips: s.CBFips, Sqft: s.Sqft, Bedrooms: s.Bedrooms, TotalBath: s.TotalBath, X: s.X, Y: s.Y, DamCat: s.DamCat, GroundElevation: s.GroundElevation}}
 }
+
 func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per"}
 	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0}
@@ -263,7 +264,7 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 
 func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterministic, depth_ffe float64) (float64, float64) {
 	mean := df.DamageVectorMean.Intercept +
-		(df.DamageVectorMean.Depth * depth_ffe) +
+		(df.DamageVectorMean.Depth * math.Sqrt(depth_ffe)) +
 		(df.DamageVectorMean.Sqft * s.Sqft) +
 		(df.DamageVectorMean.N_bed * float64(s.Bedrooms)) +
 		(df.DamageVectorMean.N_bath * float64(s.TotalBath)) +
@@ -272,7 +273,7 @@ func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterminist
 		(df.DamageVectorMean.Depth_n_bath * depth_ffe * float64(s.TotalBath))
 
 	sd := df.DamageVectorSD.Intercept +
-		(df.DamageVectorSD.Depth * depth_ffe) +
+		(df.DamageVectorSD.Depth * math.Sqrt(depth_ffe)) +
 		(df.DamageVectorSD.Sqft * s.Sqft) +
 		(df.DamageVectorSD.N_bed * float64(s.Bedrooms)) +
 		(df.DamageVectorSD.N_bath * float64(s.TotalBath)) +
@@ -281,21 +282,6 @@ func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterminist
 		(df.DamageVectorSD.Depth_n_bath * depth_ffe * float64(s.TotalBath))
 
 	return mean, sd
-}
-
-func computeConsequencesMultiVariate_forJamesModel(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
-
-	ed := e.Depth()
-	depthAboveFFE := (ed / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
-	header := []string{"fd_id", "depth_ffe"}
-	results := []interface{}{s.BaseStructure.Name, depthAboveFFE}
-	var ret = consequences.Result{Headers: header, Result: results}
-	var err error = nil
-	if ed <= 0 {
-		err = errors.New("not flooded")
-	}
-
-	return ret, err
 }
 
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
@@ -394,9 +380,9 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ghg_sd := 0.0
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
-			// depthAboveFFE = e.Depth() - s.FoundHt
+			depthAboveFFE = e.Depth() - s.FoundHt
 			// TODO: This should be managed in the config.
-			depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
+			// depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
 
 			if e.Depth() > 0.0 {
 				sdampercent = sDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0 //assumes what type the damage array is in

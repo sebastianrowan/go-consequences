@@ -78,30 +78,30 @@ def build_mv_dmg_damage_function1():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 25920,
-                    "depth": 1656,
-                    "sqft": 20.63,
-                    "n_bed": 332.2,
+                    "intercept": 12798,
+                    "depth": 9438,
+                    "sqft": 11.33,
+                    "n_bed": 0,
                     "n_bath": 0,
-                    "n_car": 1097,
-                    "depth_sqft": 1.884,
-                    "depth_n_bed": 63.44,
-                    "depth_n_bath": 0,
-                    "depth_n_car": 152.2,
-                    "r-squared": 0.922
-                },
-                "damagevectorsd": {
-                    "intercept": 2289,
-                    "depth": 91.64,
-                    "sqft": 3.404,
-                    "n_bed": 26.9,
-                    "n_bath": -139.7,
-                    "n_car": 55.65,
-                    "depth_sqft": 0.09518,
+                    "n_car": 0,
+                    "depth_sqft": 11.79,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9002
+                    "r-squared": 0.9429
+                },
+                "damagevectorsd": {
+                    "intercept": 348.4,
+                    "depth": 1118,
+                    "sqft": 7.117,
+                    "n_bed": 0,
+                    "n_bath": 0,
+                    "n_car": 0,
+                    "depth_sqft": 1.086,
+                    "depth_n_bed": 0,
+                    "depth_n_bath": 0,
+                    "depth_n_car": 0,
+                    "r-squared": 0.8814
                 }
             }
         }
@@ -122,30 +122,30 @@ def build_mv_dmg_damage_function2():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 21910,
-                    "depth": 2619,
-                    "sqft": 16.43,
-                    "n_bed": 3130,
-                    "n_bath": -226.3,
-                    "n_car": 850.1,
-                    "depth_sqft": 1.816,
-                    "depth_n_bed": 0,
-                    "depth_n_bath": 124.1,
+                    "intercept": 7003,
+                    "depth": 11817,
+                    "sqft": 3.306,
+                    "n_bed": 4054,
+                    "n_bath": 0,
+                    "n_car": 0,
+                    "depth_sqft": 7.043,
+                    "depth_n_bed": 3679,
+                    "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9294
+                    "r-squared": 0.8744
                 },
                 "damagevectorsd": {
-                    "intercept": 1768,
-                    "depth": 198.2,
-                    "sqft": 2.654,
-                    "n_bed": 370.3,
-                    "n_bath": 25.97,
-                    "n_car": -279.3,
-                    "depth_sqft": 0.1179,
+                    "intercept": -2234,
+                    "depth": 2165,
+                    "sqft": 3.6302,
+                    "n_bed": 1377,
+                    "n_bath": 0,
+                    "n_car": 0,
+                    "depth_sqft": 0.6815,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
-                    "depth_n_car": 52.41,
-                    "r-squared": 0.8711
+                    "depth_n_car": 0,
+                    "r-squared": 0.7649
                 }
             }
         }
@@ -166,30 +166,30 @@ def build_mv_ghg_damage_function1():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 6357,
-                    "depth": 428.1,
-                    "sqft": 8.308,
-                    "n_bed": 240.6,
+                    "intercept": 2983,
+                    "depth": 2434,
+                    "sqft": -0.091,
+                    "n_bed": 0,
                     "n_bath": 0,
-                    "n_car": 753.8,
-                    "depth_sqft": 0.6985,
+                    "n_car": 0,
+                    "depth_sqft": 4.685,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9315
+                    "r-squared": 0.931
                 },
                 "damagevectorsd": {
-                    "intercept": 648.5,
-                    "depth": 10.23,
-                    "sqft": 2.254,
-                    "n_bed": -17.89,
-                    "n_bath": -18.39,
-                    "n_car": 50,
-                    "depth_sqft": 0.01342,
+                    "intercept": -62,
+                    "depth": 364.8,
+                    "sqft": -0.19,
+                    "n_bed": 0,
+                    "n_bath": 0,
+                    "n_car": 0,
+                    "depth_sqft": 0.83,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9453
+                    "r-squared": 0.7935
                 }
             }
         }
@@ -210,30 +210,30 @@ def build_mv_ghg_damage_function2():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 4540,
-                    "depth": 655.6,
-                    "sqft": 6.351,
-                    "n_bed": 1145,
-                    "n_bath": 312.2,
+                    "intercept": 2181,
+                    "depth": 2637,
+                    "sqft": -1.43,
+                    "n_bed": 599.9,
+                    "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 0.6723,
-                    "depth_n_bed": 0,
+                    "depth_sqft": 2.913,
+                    "depth_n_bed": 1174,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9406
+                    "r-squared": 0.8848
                 },
                 "damagevectorsd": {
-                    "intercept": 31.16,
-                    "depth": 24.59,
-                    "sqft": 1.839,
-                    "n_bed": 154.5,
-                    "n_bath": 5.034,
+                    "intercept": 376,
+                    "depth": 119.3,
+                    "sqft": -.2573,
+                    "n_bed": -90.8,
+                    "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 0.01464,
-                    "depth_n_bed": 0,
+                    "depth_sqft": 0.5196,
+                    "depth_n_bed": 257.2,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.8769
+                    "r-squared": 0.7797
                 }
             }
         }
@@ -254,7 +254,7 @@ def build_mv_damage_function_null():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 0,
+                    "intercept": -9999,
                     "depth": 0,
                     "sqft": 0,
                     "n_bed": 0,
@@ -339,8 +339,8 @@ def main():
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_ghg2
         else:
             print(f"{o['name']} getting ghg dfnull")
-            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = dfnull
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['mv_structure'] = df_mv_null
+            occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas'] = dfnull
             occtypes_out['occupancytypes'][o['name']]['componentdamagefunctions']['greenhouse_gas2'] = df_mv_null
 
     # print(occtypes_out)

@@ -2,6 +2,7 @@ package compute
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"math/rand"
@@ -68,6 +69,7 @@ func ComputeSpecialEAD(damages []float64, freq []float64) float64 {
 	}
 	return eadT
 }
+
 func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
@@ -88,6 +90,7 @@ func StreamAbstract(hp hazardproviders.HazardProvider, sp consequences.StreamPro
 		}
 	})
 }
+
 func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Printf("Computing %v frequencies\n", len(hps))
 	//ASSUMPTION hazard providers and frequencies are in the same order
@@ -173,6 +176,7 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 	})
 
 }
+
 func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Println("FIPS Code is " + FIPSCODE)
 	sp.ByFips(FIPSCODE, func(f consequences.Receptor) {
@@ -261,6 +265,7 @@ func StreamAbstractByFIPS_WithECAM(FIPSCODE string, hp hazardproviders.HazardPro
 		}
 	}
 }
+
 func StreamAbstractMultiVariate(hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	//get boundingbox
 	fmt.Println("Getting bbox")
@@ -312,16 +317,11 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 
 		var results []interface{}
 
-		s, sok := f.(structures.StructureStochastic)
-		if sok {
-			results = append(results, s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt.CentralTendency(), s.CBFips)
-		} else {
-			sd, sdok := f.(structures.StructureDeterministic)
-			if !sdok {
-				return
-			}
-			results = append(results, sd.Name, sd.X, sd.Y, sd.DamCat, sd.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt, s.CBFips)
+		s, sok := f.(structures.StructureDeterministic)
+		if !sok {
+			panic(errors.New("Error casting consequences receptor to StructureDeterministic"))
 		}
+		results = append(results, s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt, s.CBFips)
 
 		depths := make([]float64, len(freqs))
 		sEADs := make([]float64, len(freqs))
@@ -355,16 +355,16 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						//panic?
 						sEADs[index] = 0.0
 					} else {
-						damage := sdam.(float64)
-						sEADs[index] = damage
+						sdamage := sdam.(float64)
+						sEADs[index] = sdamage
 					}
 					cdam, err := r.Fetch("content damage")
 					if err != nil {
 						//panic?
 						cEADs[index] = 0.0
 					} else {
-						damage := cdam.(float64)
-						cEADs[index] = damage
+						cdamage := cdam.(float64)
+						cEADs[index] = cdamage
 					}
 
 					dmg_mean, err := r.Fetch("dmg_mean")
@@ -372,8 +372,11 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						//panic?
 						mean_dmg_EADs[index] = 0.0
 					} else {
-						damage := dmg_mean.(float64)
-						mean_dmg_EADs[index] = damage
+						sdamage2 := dmg_mean.(float64)
+						if dmg_mean == -9999.0 {
+							sdamage2 = sdam.(float64)
+						}
+						mean_dmg_EADs[index] = sdamage2
 					}
 
 					dmg_sd, err := r.Fetch("dmg_sd")
@@ -381,8 +384,8 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						//panic?
 						sd_dmg_EADs[index] = 0.0
 					} else {
-						damage := dmg_sd.(float64)
-						sd_dmg_EADs[index] = damage
+						damage_sd := dmg_sd.(float64)
+						sd_dmg_EADs[index] = damage_sd
 					}
 
 					ghg_mean, err := r.Fetch("ghg_mean")
@@ -390,8 +393,15 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						//panic?
 						mean_ghg_EADs[index] = 0.0
 					} else {
-						damage := ghg_mean.(float64)
-						mean_ghg_EADs[index] = damage
+						ghg := ghg_mean.(float64)
+						if ghg == -9999.0 {
+							if s.DamCat == "RES" {
+								ghg = sdam.(float64) * 0.33 // Source: USEEIO v2
+							} else {
+								ghg = sdam.(float64) * 0.40 // Source: USEEIO v2
+							}
+						}
+						mean_ghg_EADs[index] = ghg
 					}
 
 					ghg_sd, err := r.Fetch("ghg_sd")
@@ -421,14 +431,14 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 				results = append(results, 0.0)
 			}
 		}
-		sEAD := ComputeSpecialEAD(sEADs, freqs)
+		sEAD := ComputeEAD(sEADs, freqs)
 		results[5] = sEAD
 		cEAD := ComputeEAD(cEADs, freqs)
 		results[6] = cEAD
-		dmg_meanEAD := ComputeSpecialEAD(mean_dmg_EADs, freqs)
-		dmg_sdEAD := ComputeSpecialEAD(sd_dmg_EADs, freqs)
-		ghg_meanEAD := ComputeSpecialEAD(mean_ghg_EADs, freqs)
-		ghg_sdEAD := ComputeSpecialEAD(sd_ghg_EADs, freqs)
+		dmg_meanEAD := ComputeEAD(mean_dmg_EADs, freqs)
+		dmg_sdEAD := ComputeEAD(sd_dmg_EADs, freqs)
+		ghg_meanEAD := ComputeEAD(mean_ghg_EADs, freqs)
+		ghg_sdEAD := ComputeEAD(sd_ghg_EADs, freqs)
 
 		results[7] = dmg_meanEAD
 		results[8] = dmg_sdEAD
@@ -441,76 +451,4 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 
 	})
 	// w.Close()
-}
-
-func StreamAbstract_JamesDepths(hps []hazardproviders.HazardProvider, freqs []float64, sp consequences.StreamProvider, w consequences.ResultsWriter) {
-	// fmt.Printf("Computing %v frequencies\n", len(hps))
-	//ASSUMPTION hazard providers and frequencies are in the same order
-	//ASSUMPTION ordered by most frequent to least frequent event
-	//ASSUMPTION! get bounding box from largest frequency.
-
-	largestHp := hps[len(hps)-1]
-	bbox, err := largestHp.HazardBoundary()
-	if err != nil {
-		fmt.Printf("Unable to get the raster bounding box: %s", err)
-		return
-	}
-	//set up output tables for all frequencies.
-	header := []string{"fd_id"}
-
-	for _, f := range freqs {
-		header = append(header, fmt.Sprintf("d_1in%1.0f", 1/f))
-	}
-
-	sp.ByBbox(bbox, func(f consequences.Receptor) {
-
-		var results []interface{}
-
-		s, sok := f.(structures.StructureStochastic)
-		if sok {
-			results = append(results, s.Name)
-		} else {
-			sd, sdok := f.(structures.StructureDeterministic)
-			if !sdok {
-				return
-			}
-			results = append(results, sd.Name)
-		}
-
-		depths := make([]float64, len(freqs))
-
-		hazarddata := make([]hazards.HazardEvent, len(freqs))
-		//ProvideHazard works off of a geography.Location
-		gotWet := false
-		for index, hp := range hps {
-			d, err := hp.Hazard(geography.Location{X: f.Location().X, Y: f.Location().Y})
-			hazarddata = append(hazarddata, d)
-			if err == nil {
-				r, err3 := f.ComputeMultiVariate(d)
-				if err3 == nil {
-					gotWet = true
-					dep, err := r.Fetch("depth_ffe")
-					if err != nil {
-						depths[index] = -999.0
-					} else {
-						depths[index] = dep.(float64)
-					}
-				} else {
-					depths[index] = -999.0
-				}
-				results = append(results, depths[index])
-			} else {
-				//record zeros?
-				results = append(results, -999.0)
-			}
-			//compute damages based on hazard being able to provide depth
-		}
-		var ret = consequences.Result{Headers: header, Result: results}
-		if gotWet {
-			w.Write(ret)
-		}
-
-	})
-	// w.Close()
-
 }

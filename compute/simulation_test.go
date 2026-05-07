@@ -48,6 +48,25 @@ func TestComputeSpecialEAD(t *testing.T) {
 		t.Errorf("computeEAD() yeilded %f; expected %f", val, 1.875)
 	}
 }
+
+func TestComputeEADandSpecial(t *testing.T) {
+	d := []float64{0, 0, 127896.2, 174041, 192109.7, 201473.6, 205178.7, 208213.8, 212231.8}
+	f := []float64{1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002}
+
+	val := ComputeEAD(d, f)
+	val2 := ComputeSpecialEAD(d, f)
+	fmt.Println(val)
+	fmt.Println(val2)
+}
+
+func TestComputeSpecialEAD2(t *testing.T) {
+	d := []float64{0, 0, 127896.2, 174041, 192109.7, 201473.6, 205178.7, 208213.8, 212231.8}
+	f := []float64{1, 0.5, 0.2, 0.1, 0.05, 0.02, 0.01, 0.005, 0.002}
+
+	val := ComputeSpecialEAD(d, f)
+	fmt.Println(val)
+}
+
 func Test_StreamAbstract_MultiFrequency(t *testing.T) {
 	//initialize the NSI API structure provider
 	dataset := "Rice_CowCreek_depth"
