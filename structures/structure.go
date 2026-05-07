@@ -334,28 +334,6 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		return ret, ghgerr2
 	}
 
-	// dv_dmg_mean := mvDamFun.DamageVectorMean
-	// dv_dmg_sd := mvDamFun.DamageVectorSD
-
-	// dv_ghg_mean := ghgDamFun2.DamageVectorMean
-	// dv_ghg_sd := ghgDamFun2.DamageVectorSD
-
-	// dv_dmg_mean_depth := dv_dmg_mean.Depth
-	// dv_dmg_mean_sqft := dv_dmg_mean.Sqft
-	// dv_dmg_mean_depth_sqft := dv_dmg_mean.Depth_sqft
-
-	// dv_dmg_sd_depth := dv_dmg_sd.Depth
-	// dv_dmg_sd_sqft := dv_dmg_sd.Sqft
-	// dv_dmg_sd_depth_sqft := dv_dmg_sd.Depth_sqft
-
-	// dv_ghg_mean_depth := dv_ghg_mean.Depth
-	// dv_ghg_mean_sqft := dv_ghg_mean.Sqft
-	// dv_ghg_mean_depth_sqft := dv_ghg_mean.Depth_sqft
-
-	// dv_ghg_sd_depth := dv_ghg_sd.Depth
-	// dv_ghg_sd_sqft := dv_ghg_sd.Sqft
-	// dv_ghg_sd_depth_sqft := dv_ghg_sd.Depth_sqft
-
 	if sDamFun.DamageDriver == hazards.Depth {
 		damagefunctionMax := 24.0 //default in case it doesnt cast to paired data.
 		damagefunctionMax = sDamFun.DamageFunction.Xvals[len(sDamFun.DamageFunction.Xvals)-1]
