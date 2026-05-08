@@ -54,6 +54,7 @@ func ArrivalDepthAndDurationHazardFunction() HazardFunction {
 		d.SetDepth(valueIn.Depth)
 		d.SetDuration(valueIn.Duration)
 		d.SetArrivalTime(valueIn.ArrivalTime)
+		d.SetQualitative(valueIn.Qualitative) //EXPERIMENTAL
 		return d, nil
 	}
 }

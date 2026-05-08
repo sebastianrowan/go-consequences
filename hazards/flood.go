@@ -122,6 +122,7 @@ func (ad ArrivalandDurationEvent) Has(p Parameter) bool {
 
 // ArrivalandDurationEvent describes an event with an arrival time, depth and a duration in days
 type ArrivalDepthandDurationEvent struct {
+	stormevent_id  string //EXPERIMENTAL
 	arrivalTime    time.Time
 	depth          float64
 	durationInDays float64
@@ -162,7 +163,10 @@ func (h ArrivalDepthandDurationEvent) Salinity() bool {
 	return false
 }
 func (h ArrivalDepthandDurationEvent) Qualitative() string {
-	return ""
+	return h.stormevent_id //EXPERIMENTAL
+}
+func (h *ArrivalDepthandDurationEvent) SetQualitative(id string) {
+	h.stormevent_id = id //EXPERIMENTAL
 }
 func (h ArrivalDepthandDurationEvent) DV() float64 {
 	return -901.0
