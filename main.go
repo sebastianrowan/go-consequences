@@ -16,16 +16,17 @@ import (
 )
 
 type leveeConfig struct {
-	Year         string `json:"year"`
-	SSP          string `json:"ssp"`
-	ScenarioList string `json:"scenarios"`
-	DataDir      string `json:"data_dir"`
-	ResultDir    string `json:"results_dir"`
+	Year                                    string `json:"year"`
+	SSP                                     string `json:"ssp"`
+	ScenarioList                            string `json:"scenarios"`
+	DataDir                                 string `json:"data_dir"`
+	ResultDir                               string `json:"results_dir"`
+	structureprovider.StructureProviderInfo `json:"structure_provider_info"`
 }
 
 func compute_LeveeMultiFrequency(scenario string, conf leveeConfig) {
 
-	nsp, err := structureprovider.InitStructureProvider("/workspaces/go-consequences/data/nsi/nsi_levee_setback.gpkg", "nsi_sp", "GPKG")
+	nsp, err := structureprovider.InitStructureProvider(conf.StructureFilePath, conf.LayerName, conf.StructureProviderDriver)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,7 +49,15 @@ func compute_LeveeMultiFrequency(scenario string, conf leveeConfig) {
 		frequencies[i] = 1.0 / float64(r)
 		file := fmt.Sprintf("%s/%dyr_%s_%s_Depth.tif", conf.DataDir, r, year_ssp, scenario)
 
-		hp, err := hazardproviders.Init(file)
+		li := hazardproviders.LeveeInfo{
+			DepthFP:        file,
+			BoundaryDriver: "GPKG",
+			BoundaryFP:     conf.StructureFilePath,
+			BoundaryLayer:  "leveed_areas",
+			BoundaryName:   scenario,
+		}
+
+		hp, err := hazardproviders.InitLeveedHP(li)
 		if err != nil {
 			log.Fatal("Failed to get hazard provider for file: ", file, "\n", err)
 		}

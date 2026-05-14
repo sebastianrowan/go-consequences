@@ -263,23 +263,25 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 }
 
 func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterministic, depth_ffe float64) (float64, float64) {
+	depth_calc := math.Sqrt(depth_ffe + 2)
+
 	mean := df.DamageVectorMean.Intercept +
-		(df.DamageVectorMean.Depth * math.Sqrt(depth_ffe)) +
+		(df.DamageVectorMean.Depth * depth_calc) +
 		(df.DamageVectorMean.Sqft * s.Sqft) +
 		(df.DamageVectorMean.N_bed * float64(s.Bedrooms)) +
 		(df.DamageVectorMean.N_bath * float64(s.TotalBath)) +
-		(df.DamageVectorMean.Depth_sqft * depth_ffe * s.Sqft) +
-		(df.DamageVectorMean.Depth_n_bed * depth_ffe * float64(s.Bedrooms)) +
-		(df.DamageVectorMean.Depth_n_bath * depth_ffe * float64(s.TotalBath))
+		(df.DamageVectorMean.Depth_sqft * depth_calc * s.Sqft) +
+		(df.DamageVectorMean.Depth_n_bed * depth_calc * float64(s.Bedrooms)) +
+		(df.DamageVectorMean.Depth_n_bath * depth_calc * float64(s.TotalBath))
 
 	sd := df.DamageVectorSD.Intercept +
-		(df.DamageVectorSD.Depth * math.Sqrt(depth_ffe)) +
+		(df.DamageVectorSD.Depth * depth_calc) +
 		(df.DamageVectorSD.Sqft * s.Sqft) +
 		(df.DamageVectorSD.N_bed * float64(s.Bedrooms)) +
 		(df.DamageVectorSD.N_bath * float64(s.TotalBath)) +
-		(df.DamageVectorSD.Depth_sqft * depth_ffe * s.Sqft) +
-		(df.DamageVectorSD.Depth_n_bed * depth_ffe * float64(s.Bedrooms)) +
-		(df.DamageVectorSD.Depth_n_bath * depth_ffe * float64(s.TotalBath))
+		(df.DamageVectorSD.Depth_sqft * depth_calc * s.Sqft) +
+		(df.DamageVectorSD.Depth_n_bed * depth_calc * float64(s.Bedrooms)) +
+		(df.DamageVectorSD.Depth_n_bath * depth_calc * float64(s.TotalBath))
 
 	return mean, sd
 }
@@ -435,56 +437,3 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 	}
 	return ret, err
 }
-
-/*
-func computeConsequencesWithReconstruction(e hazards.ArrivalDepthandDurationEvent, s StructureDeterministic) (consequences.Result, error) {
-	header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "daystoreconstruction", "rebuilddate"}
-	results := []interface{}{"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0, 0, 0, 0, 0, "CENSUSBLOCKFIPS", 0.0, time.Now()}
-	var ret = consequences.Result{Headers: header, Result: results}
-	var err error = nil
-
-	if e.Has(hazards.Depth) { //currently the damage functions are depth based, so depth is required, the getstructuredamagefunctionforhazard method chooses approprate damage functions for a hazard.
-		if e.Depth() < 0.0 {
-			err = errors.New("depth above ground was less than zero")
-		}
-		if e.Depth() > 9999.0 {
-			err = errors.New("depth above ground was greater than 9999")
-		}
-		depthAboveFFE := e.Depth() - s.FoundHt
-		damagePercent := s.OccType.GetStructureDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100 //assumes what type the damage array is in
-		cdamagePercent := s.OccType.GetContentDamageFunctionForHazard(e).SampleValue(depthAboveFFE) / 100
-		reconstructiondays := 0.0
-		switch s.DamCat {
-		case "RES":
-			reconstructiondays = 30.0
-		case "COM":
-			reconstructiondays = 90.0
-		case "IND":
-			reconstructiondays = 270.0
-		case "PUB":
-			reconstructiondays = 360.0
-		default:
-			reconstructiondays = 180.0
-		}
-		ret.Result[0] = s.BaseStructure.Name
-		ret.Result[1] = s.BaseStructure.X
-		ret.Result[2] = s.BaseStructure.Y
-		ret.Result[3] = e
-		ret.Result[4] = s.BaseStructure.DamCat
-		ret.Result[5] = s.OccType.Name
-		ret.Result[6] = damagePercent * s.StructVal
-		ret.Result[7] = cdamagePercent * s.ContVal
-		ret.Result[8] = s.Pop2amu65
-		ret.Result[9] = s.Pop2amo65
-		ret.Result[10] = s.Pop2pmu65
-		ret.Result[11] = s.Pop2pmo65
-		ret.Result[12] = s.CBFips
-		rebuilddays := (damagePercent * reconstructiondays) + e.Duration()
-		ret.Result[13] = rebuilddays
-		ret.Result[14] = e.ArrivalTime().AddDate(0, 0, int(rebuilddays)) //rounds to int
-	} else {
-		err = errors.New("Hazard did not contain depth")
-	}
-	return ret, err
-}
-*/

@@ -78,30 +78,30 @@ def build_mv_dmg_damage_function1():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 12798,
-                    "depth": 9438,
-                    "sqft": 11.33,
+                    "intercept": -3835,
+                    "depth": 13391,
+                    "sqft": -8.043,
                     "n_bed": 0,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 11.79,
+                    "depth_sqft": 16.361,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.9429
+                    "r-squared": 0.9208
                 },
                 "damagevectorsd": {
-                    "intercept": 348.4,
-                    "depth": 1118,
-                    "sqft": 7.117,
+                    "intercept": -405.8,
+                    "depth": 1232,
+                    "sqft": 2.353,
                     "n_bed": 0,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 1.086,
+                    "depth_sqft": 2.389,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.8814
+                    "r-squared": 0.803
                 }
             }
         }
@@ -122,30 +122,30 @@ def build_mv_dmg_damage_function2():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 7003,
-                    "depth": 11817,
-                    "sqft": 3.306,
-                    "n_bed": 4054,
+                    "intercept": -10090,
+                    "depth": 15690,
+                    "sqft": -6.864,
+                    "n_bed": -2127,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 7.043,
-                    "depth_n_bed": 3679,
+                    "depth_sqft": 9.379,
+                    "depth_n_bed": 5136,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.8744
+                    "r-squared": 0.8921
                 },
                 "damagevectorsd": {
-                    "intercept": -2234,
-                    "depth": 2165,
-                    "sqft": 3.6302,
-                    "n_bed": 1377,
+                    "intercept": -3074,
+                    "depth": 2205,
+                    "sqft": 0.9845,
+                    "n_bed": -93.3,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 0.6815,
-                    "depth_n_bed": 0,
+                    "depth_sqft": 1.402,
+                    "depth_n_bed": 1047,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.7649
+                    "r-squared": 0.8085
                 }
             }
         }
@@ -166,30 +166,30 @@ def build_mv_ghg_damage_function1():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 2983,
-                    "depth": 2434,
-                    "sqft": -0.091,
+                    "intercept": -1085,
+                    "depth": 3388,
+                    "sqft": -5.666,
                     "n_bed": 0,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 4.685,
+                    "depth_sqft": 5.876,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.931
+                    "r-squared": 0.9382
                 },
                 "damagevectorsd": {
-                    "intercept": -62,
-                    "depth": 364.8,
-                    "sqft": -0.19,
+                    "intercept": -158,
+                    "depth": 357.9,
+                    "sqft": -1.14,
                     "n_bed": 0,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 0.83,
+                    "depth_sqft": 1.03,
                     "depth_n_bed": 0,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.7935
+                    "r-squared": 0.8449
                 }
             }
         }
@@ -210,30 +210,30 @@ def build_mv_ghg_damage_function2():
                     ]
                 },
                 "damagevectormean": {
-                    "intercept": 2181,
-                    "depth": 2637,
-                    "sqft": -1.43,
-                    "n_bed": 599.9,
+                    "intercept": -1822,
+                    "depth": 3556,
+                    "sqft": -4.333,
+                    "n_bed": -1048,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 2.913,
-                    "depth_n_bed": 1174,
+                    "depth_sqft": 3.492,
+                    "depth_n_bed": 1543,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.8848
+                    "r-squared": 0.9114
                 },
                 "damagevectorsd": {
-                    "intercept": 376,
-                    "depth": 119.3,
-                    "sqft": -.2573,
-                    "n_bed": -90.8,
+                    "intercept": 388,
+                    "depth": 103.3,
+                    "sqft": -0.7937,
+                    "n_bed": -363.6,
                     "n_bath": 0,
                     "n_car": 0,
-                    "depth_sqft": 0.5196,
-                    "depth_n_bed": 257.2,
+                    "depth_sqft": 0.6293,
+                    "depth_n_bed": 312.8,
                     "depth_n_bath": 0,
                     "depth_n_car": 0,
-                    "r-squared": 0.7797
+                    "r-squared": 0.8373
                 }
             }
         }

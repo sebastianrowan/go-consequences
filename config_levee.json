@@ -3,5 +3,11 @@
     "ssp": "",
     "scenarios": "/workspaces/go-consequences/data/levee/scenarios.json",
     "data_dir": "/mnt/dlevee/data",
-    "results_dir": "/mnt/dlevee/results"
+    "results_dir": "/mnt/dlevee/results",
+    "structure_provider_info": {
+        "layername": "nsi_leveed_sp",
+        "structure_provider_driver": "GPKG",
+        "structure_provider_type": "Provider_Local",
+        "structure_file_path": "/workspaces/go-consequences/data/nsi/nsi_levee_setback.gpkg"
+    }
 }
