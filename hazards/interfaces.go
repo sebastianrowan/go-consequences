@@ -249,7 +249,7 @@ type MultiHazardEvent interface {
 	IsSorted() bool
 }
 
-// type MultiHazardFrequencyEvent interface {
-// 	MultiHazardEvent
-// 	Frequency() float64
-// }
+type MultiHazardFrequencyEvent interface {
+	MultiHazardEvent
+	Frequency() float64
+}
