@@ -263,7 +263,8 @@ func computeConsequences(e hazards.HazardEvent, s StructureDeterministic) (conse
 }
 
 func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterministic, depth_ffe float64) (float64, float64) {
-	depth_calc := math.Sqrt(depth_ffe + 2)
+
+	depth_calc := math.Sqrt(math.Min(depth_ffe, 16.0) + 2)
 
 	mean := df.DamageVectorMean.Intercept +
 		(df.DamageVectorMean.Depth * depth_calc) +
@@ -286,17 +287,42 @@ func damageVectorCalculate(df DamageFunctionMultiVariate, s StructureDeterminist
 	return mean, sd
 }
 
+func mentalHealthCalculate(pct_loss float64, s_pop int32) (float64, float64) {
+	base_prevalence_depression := 0.155
+	base_prevalence_ptsd := 0.041
+
+	depression_or := 1.75
+	ptsd_or := 2.66
+
+	depression_rr := depression_or / (1 - base_prevalence_depression + (base_prevalence_depression * depression_or))
+	ptsd_rr := ptsd_or / (1 - base_prevalence_ptsd + (base_prevalence_ptsd * ptsd_or))
+
+	depression_cases := float64(s_pop) * base_prevalence_depression
+	ptsd_cases := float64(s_pop) * base_prevalence_ptsd
+
+	depression_new_cases := 0.0
+	ptsd_new_cases := 0.0
+
+	if pct_loss > 0.10 {
+		depression_new_cases = (depression_cases * depression_rr) - depression_cases
+		ptsd_new_cases = (ptsd_cases * ptsd_rr) - ptsd_cases
+	}
+
+	return depression_cases, ptsd_cases
+
+}
+
 func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDeterministic) (consequences.Result, error) {
 
 	// header := []string{"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage", "pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe", "ghg_mean"}
 	header := []string{
 		"fd_id", "x", "y", "hazard", "damage category", "occupancy type", "structure damage", "content damage",
 		"pop2amu65", "pop2amo65", "pop2pmu65", "pop2pmo65", "cbfips", "s_dam_per", "c_dam_per", "depth_ffe",
-		"dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd", "fd_height"}
+		"dmg_mean", "dmg_sd", "ghg_mean", "ghg_sd", "fd_height", "depression_cases", "ptsd_cases"}
 	results := []interface{}{
 		"updateme", 0.0, 0.0, e, "dc", "ot", 0.0, 0.0,
 		0, 0, 0, 0, "CENSUSBLOCKFIPS", 0, 0, 0,
-		0, 0, 0, 0, 0}
+		0, 0, 0, 0, 0, 0.0, 0.0}
 
 	var ret = consequences.Result{Headers: header, Result: results}
 	var err error = nil
@@ -358,9 +384,12 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		dmg_sd := 0.0
 		ghg_mean := 0.0
 		ghg_sd := 0.0
+		depression_cases := 0.0
+		ptsd_cases := 0.0
 		switch sDamFun.DamageDriver {
 		case hazards.Depth:
 			depthAboveFFE = e.Depth() - s.FoundHt
+
 			// TODO: This should be managed in the config.
 			// depthAboveFFE = (e.Depth() / 100.0) - s.FoundHt // Fathom depth grid values are int16 hundreths of feet (1.25ft --> 125)
 
@@ -369,7 +398,7 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 				cdampercent = cDamFun.DamageFunction.SampleValue(depthAboveFFE) / 100.0
 				// ghgEmissions = ghgDamFun.DamageFunction.SampleValue(depthAboveFFE)
 
-				if depthAboveFFE > 0.0 {
+				if depthAboveFFE+2 > 0.0 {
 					// dmg_mean = (dv_dmg_mean_depth * depthAboveFFE) + (dv_dmg_mean_sqft * s.Sqft) + (dv_dmg_mean_depth_sqft * depthAboveFFE * s.Sqft)
 					// dmg_sd = (dv_dmg_sd_depth * depthAboveFFE) + (dv_dmg_sd_sqft * s.Sqft) + (dv_dmg_sd_depth_sqft * depthAboveFFE * s.Sqft)
 					dmg_mean, dmg_sd = damageVectorCalculate(mvDamFun, s, depthAboveFFE)
@@ -378,6 +407,10 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 					// ghg_sd = (dv_ghg_sd_depth * depthAboveFFE) + (dv_ghg_sd_sqft * s.Sqft) + (dv_ghg_sd_depth_sqft * depthAboveFFE * s.Sqft)
 					ghg_mean, ghg_sd = damageVectorCalculate(ghgDamFun2, s, depthAboveFFE)
 				}
+			}
+
+			if s.DamCat == "RES" {
+				depression_cases, ptsd_cases = mentalHealthCalculate(sdampercent, (s.Pop2amo65 + s.Pop2amu65))
 			}
 
 		case hazards.Erosion:
@@ -408,6 +441,8 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ret.Result[18] = ghg_mean
 		ret.Result[19] = ghg_sd
 		ret.Result[20] = s.FoundHt
+		ret.Result[21] = depression_cases
+		ret.Result[22] = ptsd_cases
 
 	} else if e.Has(hazards.Qualitative) {
 		//this was done primarily to support the NHC in categorizing structures in special zones in their classified surge grids.
@@ -432,6 +467,8 @@ func computeConsequencesMultiVariate(e hazards.HazardEvent, s StructureDetermini
 		ret.Result[18] = 0.0
 		ret.Result[19] = 0.0
 		ret.Result[20] = s.FoundHt
+		ret.Result[21] = 0.0
+		ret.Result[22] = 0.0
 	} else {
 		err = errors.New("structure: hazard did not contain valid parameters to impact a structure")
 	}

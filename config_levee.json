@@ -2,7 +2,7 @@
     "year": "2026",
     "ssp": "",
     "scenarios": "/workspaces/go-consequences/data/levee/scenarios.json",
-    "data_dir": "/mnt/dlevee/data",
+    "data_dir": "/mnt/dlevee/data/depth_v1",
     "results_dir": "/mnt/dlevee/results",
     "structure_provider_info": {
         "layername": "nsi_leveed_sp",

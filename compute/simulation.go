@@ -300,7 +300,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		return
 	}
 	//set up output tables for all frequencies.
-	header := []string{"fd_id", "x", "y", "damcat", "occupancy type", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "found_ht", "cb_id"}
+	header := []string{"fd_id", "x", "y", "damcat", "occupancy type", "S_EAD", "C_EAD", "DM_EAD", "DS_EAD", "GM_EAD", "GS_EAD", "MDD_EAD", "PTSD_EAD", "found_ht", "cb_id"}
 
 	for _, f := range freqs {
 		header = append(header, fmt.Sprintf("%2.6fdepthFFE", f))
@@ -310,6 +310,8 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		header = append(header, fmt.Sprintf("%2.6fDS", f))
 		header = append(header, fmt.Sprintf("%2.6fGM", f))
 		header = append(header, fmt.Sprintf("%2.6fGS", f))
+		header = append(header, fmt.Sprintf("%2.6fMDD", f))
+		header = append(header, fmt.Sprintf("%2.6fPTSD", f))
 		// header = append(header, fmt.Sprintf("%2.6fH", f))
 	}
 
@@ -321,7 +323,7 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		if !sok {
 			panic(errors.New("Error casting consequences receptor to StructureDeterministic"))
 		}
-		results = append(results, s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt, s.CBFips)
+		results = append(results, s.Name, s.X, s.Y, s.DamCat, s.OccType.Name, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, s.FoundHt, s.CBFips)
 
 		depths := make([]float64, len(freqs))
 		sEADs := make([]float64, len(freqs))
@@ -330,6 +332,9 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		sd_dmg_EADs := make([]float64, len(freqs))
 		mean_ghg_EADs := make([]float64, len(freqs))
 		sd_ghg_EADs := make([]float64, len(freqs))
+
+		depression_EADs := make([]float64, len(freqs))
+		ptsd_EADs := make([]float64, len(freqs))
 
 		hazarddata := make([]hazards.HazardEvent, len(freqs))
 		//ProvideHazard works off of a geography.Location
@@ -409,8 +414,26 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 						//panic?
 						sd_ghg_EADs[index] = 0.0
 					} else {
-						damage := ghg_sd.(float64)
-						sd_ghg_EADs[index] = damage
+						value := ghg_sd.(float64)
+						sd_ghg_EADs[index] = value
+					}
+
+					depression_cases, err := r.Fetch("depression_cases")
+					if err != nil {
+						//panic?
+						depression_EADs[index] = 0.0
+					} else {
+						cases := depression_cases.(float64)
+						depression_EADs[index] = cases
+					}
+
+					ptsd_cases, err := r.Fetch("ptsd_cases")
+					if err != nil {
+						//panic?
+						ptsd_EADs[index] = 0.0
+					} else {
+						cases := ptsd_cases.(float64)
+						ptsd_EADs[index] = cases
 					}
 				}
 				results = append(results, depths[index])
@@ -420,9 +443,13 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 				results = append(results, sd_dmg_EADs[index])
 				results = append(results, mean_ghg_EADs[index])
 				results = append(results, sd_ghg_EADs[index])
+				results = append(results, depression_EADs[index])
+				results = append(results, ptsd_EADs[index])
 			} else {
 				//record zeros?
 				results = append(results, -999.0)
+				results = append(results, 0.0)
+				results = append(results, 0.0)
 				results = append(results, 0.0)
 				results = append(results, 0.0)
 				results = append(results, 0.0)
@@ -444,6 +471,13 @@ func StreamAbstract_MultiFreq_MultiVar(hps []hazardproviders.HazardProvider, fre
 		results[8] = dmg_sdEAD
 		results[9] = ghg_meanEAD
 		results[10] = ghg_sdEAD
+
+		depression_EAD := ComputeEAD(depression_EADs, freqs)
+		ptsd_EAD := ComputeEAD(ptsd_EADs, freqs)
+
+		results[11] = depression_EAD
+		results[12] = ptsd_EAD
+
 		var ret = consequences.Result{Headers: header, Result: results}
 		if gotWet {
 			w.Write(ret)
