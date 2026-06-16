@@ -308,7 +308,7 @@ func mentalHealthCalculate(pct_loss float64, s_pop int32) (float64, float64) {
 		ptsd_new_cases = (ptsd_cases * ptsd_rr) - ptsd_cases
 	}
 
-	return depression_cases, ptsd_cases
+	return depression_new_cases, ptsd_new_cases
 
 }
 
