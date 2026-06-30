@@ -41,13 +41,15 @@ func compute_LeveeMultiFrequency(scenario string, conf leveeConfig) {
 
 	w, _ := resultswriters.InitSpatialResultsWriter(results_path, "result", "Parquet")
 
-	rps := []int{1, 2, 5, 10, 20, 50, 100, 200, 500}
+	rps := []int{2, 5, 10, 20, 50, 100, 200, 500}
+	// rps := []int{1, 2, 5, 10, 20, 50, 100, 200, 500}
 	frequencies := make([]float64, len(rps))
 	hazardProviders := make([]hazardproviders.HazardProvider, len(rps))
 
 	for i, r := range rps {
 		frequencies[i] = 1.0 / float64(r)
-		file := fmt.Sprintf("%s/%dyr_%s_%s_Depth.tif", conf.DataDir, r, year_ssp, scenario)
+		// file := fmt.Sprintf("%s/%dyr_%s_%s_Depth.tif", conf.DataDir, r, year_ssp, scenario)
+		file := fmt.Sprintf("%s/%s_MaxDepth_%dyr.tif", conf.DataDir, scenario, r)
 
 		li := hazardproviders.LeveeInfo{
 			DepthFP:        file,
