@@ -156,8 +156,8 @@ func run_with_channels(conf leveeConfig) {
 	c3 := process_file2(c)
 	c4 := process_file2(c)
 	c5 := process_file2(c)
-	// c6 := process_file2(c)
-	// c7 := process_file2(c)
+	c6 := process_file2(c)
+	c7 := process_file2(c)
 	// c8 := process_file2(c)
 	// c9 := process_file2(c)
 	// c10 := process_file2(c)
@@ -169,7 +169,7 @@ func run_with_channels(conf leveeConfig) {
 	// c16 := process_file2(c)
 
 	// , c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12, c13, c14, c15, c16
-	for i := range merge2(conf, c1, c2, c3, c4, c5) {
+	for i := range merge2(conf, c1, c2, c3, c4, c5, c6, c7) {
 		fmt.Println(i)
 	}
 

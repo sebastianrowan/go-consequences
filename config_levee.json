@@ -1,7 +1,7 @@
 {
     "year": "2026",
     "ssp": "",
-    "scenarios": "/workspaces/go-consequences/data/levee/test_scenarios.json",
+    "scenarios": "/workspaces/go-consequences/data/levee/scenarios.json",
     "data_dir": "/mnt/dlevee/data/depth_v3/ec",
     "results_dir": "/mnt/dlevee/results/v3/ec",
     "structure_provider_info": {
