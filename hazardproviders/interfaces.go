@@ -41,7 +41,7 @@ func DepthHazardFunction() HazardFunction {
 }
 func ArrivalAndDurationHazardFunction() HazardFunction {
 	return func(valueIn hazards.HazardData, hazard hazards.HazardEvent) (hazards.HazardEvent, error) {
-		d := hazards.ArrivalDepthandDurationEvent{}
+		d := hazards.ArrivalandDurationEvent{}
 		d.SetDuration(valueIn.Duration)
 		d.SetArrivalTime(valueIn.ArrivalTime)
 		return d, nil

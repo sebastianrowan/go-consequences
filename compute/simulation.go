@@ -169,7 +169,6 @@ func StreamAbstractMultiFrequency(hps []hazardproviders.HazardProvider, freqs []
 		}
 
 	})
-
 }
 func StreamAbstractByFIPS(FIPSCODE string, hp hazardproviders.HazardProvider, sp consequences.StreamProvider, w consequences.ResultsWriter) {
 	fmt.Println("FIPS Code is " + FIPSCODE)

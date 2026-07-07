@@ -15,6 +15,11 @@ type NassCropProvider struct {
 	CropFilter map[string]crops.Crop
 }
 
+type TiffCropProvider struct {
+	TifReader  nassTiffReader
+	CropFilter map[string]crops.Crop
+}
+
 func InitNassCropProvider(year string, cropFilter []string) NassCropProvider {
 	cfilter := make(map[string]crops.Crop, len(cropFilter))
 	m := crops.NASSCropMap()
@@ -25,6 +30,21 @@ func InitNassCropProvider(year string, cropFilter []string) NassCropProvider {
 		}
 	}
 	return NassCropProvider{Year: year, CropFilter: cfilter}
+}
+
+func InitTiffCropProvider(tiffPath string, cropFilter []string) TiffCropProvider {
+	cfilter := make(map[string]crops.Crop, len(cropFilter))
+	m := crops.NASSCropMap()
+	for _, f := range cropFilter {
+		c, ok := m[f]
+		if ok {
+			cfilter[f] = c
+		}
+	}
+
+	tr := Init(tiffPath)
+
+	return TiffCropProvider{TifReader: tr, CropFilter: cfilter}
 }
 
 func (n NassCropProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
@@ -95,4 +115,15 @@ func (n nassTiffReader) iterate(sp consequences.StreamProcessor, cfilter map[str
 			}
 		}
 	*/
+}
+
+func (n TiffCropProvider) ByFips(fipscode string, sp consequences.StreamProcessor) {
+	result, err := GetCDLFileByFIPS("2020", fipscode)
+	if err != nil {
+		panic(err)
+	}
+	result.iterate(sp, n.CropFilter)
+}
+func (n TiffCropProvider) ByBbox(bbox geography.BBox, sp consequences.StreamProcessor) {
+	n.TifReader.iterate(sp, n.CropFilter)
 }

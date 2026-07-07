@@ -63,3 +63,32 @@ func Test_StreamAbstract(t *testing.T) {
 	defer hp.Close()
 	compute.StreamAbstract(hp, nassSp, rw)
 }
+
+func Test_StreamAbstract_SBR(t *testing.T) {
+
+	filter := make([]string, 11)
+	filter[0] = "1" //filter to corn
+	filter[1] = "5"
+	filter[2] = "6"
+	filter[3] = "22"
+	filter[4] = "23"
+	filter[5] = "24"
+	filter[6] = "28"
+	filter[7] = "36"
+	filter[8] = "42"
+	filter[9] = "52"
+	filter[10] = "21"
+	// nassSp := InitNassCropProvider("2024", filter)
+	studyCrops := InitTiffCropProvider("/workspaces/go-consequences/data/levee/Harrisonville-30m-CDLS.tif", filter)                                          // choose a year                                                                                                 // fake duration
+	rw, _ := resultswriters.InitSpatialResultsWriter_EPSG_Projected("/workspaces/go-consequences/data/levee/crop_test.parquet", "agdamage", "Parquet", 5070) // testing data output
+	defer rw.Close()
+	at := time.Date(2026, time.Month(7), 1, 0, 0, 0, 0, time.UTC)
+
+	floodMap := "/mnt/dlevee/data/depth_v3/ec/clipped/HarrisonvilleRemoval_MaxDepth_2yr.tif"
+	// floodMap := "/workspaces/go-consequences/data/levee/HarrisonvilleRemoval-EC-2yr-arrival.tif"
+
+	gpkg := "/workspaces/go-consequences/data/levee/leveed_areas.gpkg"
+	hp, _ := hazardproviders.InitShpDAHP(gpkg, "harrisonville", floodMap, at, 14.0)
+	defer hp.Close()
+	compute.StreamAbstract(hp, studyCrops, rw)
+}

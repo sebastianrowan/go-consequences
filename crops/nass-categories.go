@@ -5,7 +5,7 @@ import "strconv"
 //NASSCropMap is a map of Crops to NASS Crop ID #s
 func NASSCropMap() map[string]Crop {
 	m := make(map[string]Crop)
-	root := "./resources/"
+	root := "/workspaces/go-consequences/crops/resources/"
 	m["1"] = ReadFromXML(root + "Corn.crop")
 	//m["2"] = BuildCrop(2, "Cotton")
 	//m["3"] = BuildCrop(3, "Rice")
