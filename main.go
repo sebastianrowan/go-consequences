@@ -61,15 +61,15 @@ func main() {
 	filter[10] = "21"
 	// nassSp := InitNassCropProvider("2024", filter)
 	scenarios := []string{
-		// "HarrisonvilleRemoval",
-		// "ColumbiaRemoval",
-		// "PrairieDuPontRemoval",
-		// "MESDRemoval",
-		// "WoodRemoval",
-		// "1000mSetback",
-		// "3000mSetback",
-		"1000mSetbackLeveed",
-		"3000mSetbackLeveed",
+		"HarrisonvilleRemoval",
+		"ColumbiaRemoval",
+		"PrairieDuPontRemoval",
+		"MESDRemoval",
+		"WoodRemoval",
+		"1000mSetback",
+		"3000mSetback",
+		// "1000mSetbackLeveed",
+		// "3000mSetbackLeveed",
 	}
 
 	rps := []int{2, 5, 10, 20, 50, 100, 200, 500}
@@ -82,8 +82,8 @@ func main() {
 		cropFile := fmt.Sprintf("/workspaces/go-consequences/data/levee/%s-30m-CDLS.tif", scenario)
 		for _, rp := range rps {
 			now2 := time.Now()
-			floodMap := fmt.Sprintf("/mnt/dlevee/data/depth_v3/ec/clipped/%s_MaxDepth_%vyr.tif", scenario, rp)
-			resFile := fmt.Sprintf("/mnt/dlevee/results/crops/ec/cropLoss-%s-%vyr.parquet", scenario, rp)
+			floodMap := fmt.Sprintf("/mnt/dlevee/data/depth_v3/ssp245-2020-2059/clipped/SSP245_2020-2059_%s_MaxDepth_%vyr.tif", scenario, rp)
+			resFile := fmt.Sprintf("/mnt/dlevee/results/crops/ssp245-2020-2059/cropLoss-%s-%vyr.parquet", scenario, rp)
 
 			crops := cropprovider.InitTiffCropProvider(cropFile, filter)
 			fmt.Println(crops.TifReader.FilePath)
