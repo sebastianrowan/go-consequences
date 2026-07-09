@@ -2,8 +2,8 @@
     "year": "2026",
     "ssp": "",
     "scenarios": "/workspaces/go-consequences/data/levee/scenarios.json",
-    "data_dir": "/mnt/dlevee/data/depth_v3/ec",
-    "results_dir": "/mnt/dlevee/results/v3/ec",
+    "data_dir": "/mnt/dlevee/data/depth_v3/ssp585-2020-2059",
+    "results_dir": "/mnt/dlevee/results/v3/ssp585-2020-2059",
     "structure_provider_info": {
         "layername": "nsi_leveed_sp",
         "structure_provider_driver": "GPKG",

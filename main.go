@@ -49,7 +49,7 @@ func compute_LeveeMultiFrequency(scenario string, conf leveeConfig) {
 	for i, r := range rps {
 		frequencies[i] = 1.0 / float64(r)
 		// file := fmt.Sprintf("%s/%dyr_%s_%s_Depth.tif", conf.DataDir, r, year_ssp, scenario)
-		file := fmt.Sprintf("%s/%s_MaxDepth_%dyr.tif", conf.DataDir, scenario, r)
+		file := fmt.Sprintf("%s/SSP585_2020-2059_%s_MaxDepth_%dyr.tif", conf.DataDir, scenario, r)
 
 		li := hazardproviders.LeveeInfo{
 			DepthFP:        file,
