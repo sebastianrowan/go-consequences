@@ -68,12 +68,13 @@ func main() {
 		"WoodRemoval",
 		"1000mSetback",
 		"3000mSetback",
-		// "1000mSetbackLeveed",
-		// "3000mSetbackLeveed",
+		"1000mSetbackLeveed",
+		"3000mSetbackLeveed",
 	}
 
 	rps := []int{2, 5, 10, 20, 50, 100, 200, 500}
 	gpkg := "/workspaces/go-consequences/data/levee/leveed_areas.gpkg"
+	// at := time.Date(2026, time.Month(4), 1, 0, 0, 0, 0, time.UTC)
 	at := time.Date(2026, time.Month(7), 1, 0, 0, 0, 0, time.UTC)
 
 	now := time.Now()
@@ -82,12 +83,12 @@ func main() {
 		cropFile := fmt.Sprintf("/workspaces/go-consequences/data/levee/%s-30m-CDLS.tif", scenario)
 		for _, rp := range rps {
 			now2 := time.Now()
-			floodMap := fmt.Sprintf("/mnt/dlevee/data/depth_v3/ssp245-2020-2059/clipped/SSP245_2020-2059_%s_MaxDepth_%vyr.tif", scenario, rp)
-			resFile := fmt.Sprintf("/mnt/dlevee/results/crops/ssp245-2020-2059/cropLoss-%s-%vyr.parquet", scenario, rp)
+			floodMap := fmt.Sprintf("/mnt/dlevee/data/depth_v4/ec/clipped/%s_MaxDepth_%vyr.tif", scenario, rp)
+			resFile := fmt.Sprintf("/mnt/dlevee/results/v4/crops/ec/cropLoss-%s-%vyr.parquet", scenario, rp)
 
 			crops := cropprovider.InitTiffCropProvider(cropFile, filter)
 			fmt.Println(crops.TifReader.FilePath)
-			hp, _ := hazardproviders.InitShpDAHP(gpkg, scenario, floodMap, at, 14.0)
+			hp, _ := hazardproviders.InitShpDAHP(gpkg, scenario, floodMap, at, 1.0)
 
 			rw, _ := resultswriters.InitSpatialResultsWriter_EPSG_Projected(resFile, "agdamage", "Parquet", 5070) // testing data output
 			compute.StreamAbstract(hp, crops, rw)
