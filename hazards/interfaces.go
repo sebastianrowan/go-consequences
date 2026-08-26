@@ -44,7 +44,7 @@ type MultiHazardEvent interface {
 type MultiFrequencyHazardEvent interface {
 	MultiHazardEvent
 	SetIndex(index int) error
-	Frequencies() []float64
+	HazardFrequencies() []float64
 }
 
 type HazardData struct {

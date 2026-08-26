@@ -702,3 +702,11 @@ func (h *DepthEventMultiFrequency) SetIndex(i int) error {
 	}
 	return errors.New("hazards: Attempted to set out of bounds index on DepthEventMultiFrequency event.")
 }
+
+func (h DepthEventMultiFrequency) Frequency() float64 {
+	return h.Frequencies[h.index]
+}
+
+func (h DepthEventMultiFrequency) HazardFrequencies() []float64 {
+	return h.Frequencies
+}
