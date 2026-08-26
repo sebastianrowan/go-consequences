@@ -696,7 +696,7 @@ func (h DepthEventMultiFrequency) Less(i, j int) bool {
 }
 
 func (h *DepthEventMultiFrequency) SetIndex(i int) error {
-	if i < (len(h.Events) - 1) {
+	if i < (len(h.Events)) {
 		h.index = i
 		return nil
 	}
