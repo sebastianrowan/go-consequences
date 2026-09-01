@@ -66,6 +66,7 @@ type HazardData struct {
 	Salinity    bool
 	Qualitative string
 	DV          float64
+	Frequency   float64
 }
 
 func (hd *HazardData) SetParameter(p Parameter, value any) {
